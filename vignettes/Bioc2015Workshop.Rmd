@@ -71,10 +71,10 @@ file.show(file.path(system.file(package = "GoogleGenomics"), "doc", "VariantAnno
 ```
 
 Alternatively, you can view the documentation for the [GoogleGenomics](http://bioconductor.org/packages/devel/bioc/html/GoogleGenomics.html) package by running `help(package="GoogleGenomics")` and clicking on *"User guides, package vignettes and other documentation."*.
-```
+
 
 Part 3: Analyze Variants with BigQuery
-====================================
+======================================
 
 Open the code and the rendered vignette in separate windows:
 

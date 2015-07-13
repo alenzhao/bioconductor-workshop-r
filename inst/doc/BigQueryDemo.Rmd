@@ -127,14 +127,14 @@ DisplayAndDispatchQuery <- function(queryUri, project, replacements=list()) {
 
 This allows queries to be more easily shared among analyses and also reused for different datasets.  For example, in the following file we have a query that will retrieve data from any table exported from a Google Genomics Variant Set.
 ```{r}
-file.show(file.path(system.file(package = "Bioc2015Workshop"),
+file.show(file.path(system.file(package = "GoogleGenomicsBioc2015Workshop"),
                     "sql",
                     "variant-level-data-for-brca1.sql"))
 ```
 
 Now let's run the query to retrieve variant data for BRCA1:
 ```{r comment=NA}
-result <- DisplayAndDispatchQuery(file.path(system.file(package = "Bioc2015Workshop"),
+result <- DisplayAndDispatchQuery(file.path(system.file(package = "GoogleGenomicsBioc2015Workshop"),
                                             "sql",
                                             "variant-level-data-for-brca1.sql"),
                                   project=project,
@@ -158,7 +158,7 @@ But BigQuery really shines when it is used to perform an actual *analysis* - do 
 
 Let's do that now with a query that computes the Transition Transversion ratio for the variants within genomic region windows.
 ```{r comment=NA}
-result <- DisplayAndDispatchQuery(file.path(system.file(package = "Bioc2015Workshop"),
+result <- DisplayAndDispatchQuery(file.path(system.file(package = "GoogleGenomicsBioc2015Workshop"),
                                             "sql",
                                             "ti-tv-ratio.sql"),
                                   project=project,

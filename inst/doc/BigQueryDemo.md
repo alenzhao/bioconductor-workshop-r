@@ -141,7 +141,7 @@ DisplayAndDispatchQuery <- function(queryUri, project, replacements=list()) {
 This allows queries to be more easily shared among analyses and also reused for different datasets.  For example, in the following file we have a query that will retrieve data from any table exported from a Google Genomics Variant Set.
 
 ```r
-file.show(file.path(system.file(package = "Bioc2015Workshop"),
+file.show(file.path(system.file(package = "GoogleGenomicsBioc2015Workshop"),
                     "sql",
                     "variant-level-data-for-brca1.sql"))
 ```
@@ -149,7 +149,7 @@ file.show(file.path(system.file(package = "Bioc2015Workshop"),
 Now let's run the query to retrieve variant data for BRCA1:
 
 ```r
-result <- DisplayAndDispatchQuery(file.path(system.file(package = "Bioc2015Workshop"),
+result <- DisplayAndDispatchQuery(file.path(system.file(package = "GoogleGenomicsBioc2015Workshop"),
                                             "sql",
                                             "variant-level-data-for-brca1.sql"),
                                   project=project,
@@ -257,7 +257,7 @@ But BigQuery really shines when it is used to perform an actual *analysis* - do 
 Let's do that now with a query that computes the Transition Transversion ratio for the variants within genomic region windows.
 
 ```r
-result <- DisplayAndDispatchQuery(file.path(system.file(package = "Bioc2015Workshop"),
+result <- DisplayAndDispatchQuery(file.path(system.file(package = "GoogleGenomicsBioc2015Workshop"),
                                             "sql",
                                             "ti-tv-ratio.sql"),
                                   project=project,
@@ -415,7 +415,7 @@ other attached packages:
  [1] mgcv_1.8-6                             
  [2] nlme_3.1-120                           
  [3] knitr_1.10.5                           
- [4] Bioc2015Workshop_0.1                   
+ [4] GoogleGenomicsBioc2015Workshop_0.1                   
  [5] TxDb.Hsapiens.UCSC.hg19.knownGene_3.1.3
  [6] GenomicFeatures_1.21.13                
  [7] AnnotationDbi_1.31.17                  

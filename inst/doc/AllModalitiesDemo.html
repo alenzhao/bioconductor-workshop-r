@@ -258,7 +258,7 @@ hr {
 
 <p>In this example we are reading in previously computed results, but its easy to spin up an <a href="http://spark.apache.org/">Apache Spark</a> cluster on <a href="https://cloud.google.com/hadoop/what-is-hadoop">Google Compute Engine</a> and run this analysis.</p>
 
-<pre><code class="r">pca_1kg &lt;- read.table(file.path(system.file(package = &quot;Bioc2015Workshop&quot;), &quot;extdata&quot;, &quot;1kg-pca.tsv&quot;), col.names=c(&quot;Sample&quot;, &quot;PC1&quot;, &quot;PC2&quot;))
+<pre><code class="r">pca_1kg &lt;- read.table(file.path(system.file(package = &quot;GoogleGenomicsBioc2015Workshop&quot;), &quot;extdata&quot;, &quot;1kg-pca.tsv&quot;), col.names=c(&quot;Sample&quot;, &quot;PC1&quot;, &quot;PC2&quot;))
 </code></pre>
 
 <p>This analysis performed an <code>O(N^2)</code> computation upon the relevant fields within the <em>terabyte</em> of data by running an <a href="http://spark.apache.org/">Apache Spark</a> job which used the <a href="https://cloud.google.com/genomics/v1beta2/reference/variants">Google Genomics Variants API</a> for its input.  See the Google Genomics <a href="http://googlegenomics.readthedocs.org/en/latest/use_cases/compute_principal_coordinate_analysis/index.html">PCA cookbook entry</a> for implementation details and instructions as to how to run this job.</p>
@@ -320,7 +320,7 @@ DisplayAndDispatchQuery &lt;- function(queryUri, replacements=list()) {
 }
 </code></pre>
 
-<pre><code class="r">sample_alt_counts &lt;- DisplayAndDispatchQuery(file.path(system.file(package = &quot;Bioc2015Workshop&quot;), &quot;sql&quot;, &quot;sample-alt-counts.sql&quot;))
+<pre><code class="r">sample_alt_counts &lt;- DisplayAndDispatchQuery(file.path(system.file(package = &quot;GoogleGenomicsBioc2015Workshop&quot;), &quot;sql&quot;, &quot;sample-alt-counts.sql&quot;))
 </code></pre>
 
 <pre><code># Count alternate alleles for each sample.
@@ -368,7 +368,7 @@ ggplot(sample_alt_counts) +
 
 <p>Again in this example we read in previously computed results, but since the amount of data over which we are computing is much less, it is feasible to run this Spark job on a local machine in just a few minutes.</p>
 
-<pre><code class="r">pca_1kg_brca1 &lt;- read.table(file.path(system.file(package = &quot;Bioc2015Workshop&quot;), &quot;extdata&quot;, &quot;1kg-brca1-pca.tsv&quot;), col.names=c(&quot;Sample&quot;, &quot;PC1&quot;, &quot;PC2&quot;))
+<pre><code class="r">pca_1kg_brca1 &lt;- read.table(file.path(system.file(package = &quot;GoogleGenomicsBioc2015Workshop&quot;), &quot;extdata&quot;, &quot;1kg-brca1-pca.tsv&quot;), col.names=c(&quot;Sample&quot;, &quot;PC1&quot;, &quot;PC2&quot;))
 </code></pre>
 
 <p>Examining this data visually:</p>
@@ -433,7 +433,7 @@ ggplot(pca_1kg_brca1) +
 <p>Next we perform a <a href="http://homes.cs.washington.edu/%7Esuinlee/genome560/lecture7.pdf">simplistic GWAS</a> on the BRCA1 variants to retrieve a ranked list of the variants that appear to differentiate these groups.</p>
 
 <pre><code class="r">case_sample_ids &lt;- paste(&quot;&#39;&quot;, filter(pca_1kg_brca1, case==TRUE)$Sample, &quot;&#39;&quot;, sep=&quot;&quot;, collapse=&quot;,&quot;)
-result &lt;- DisplayAndDispatchQuery(file.path(system.file(package = &quot;Bioc2015Workshop&quot;), &quot;sql&quot;, &quot;gwas-brca1-pattern.sql&quot;),
+result &lt;- DisplayAndDispatchQuery(file.path(system.file(package = &quot;GoogleGenomicsBioc2015Workshop&quot;), &quot;sql&quot;, &quot;gwas-brca1-pattern.sql&quot;),
                                   list(CASE_SAMPLE_IDS__=case_sample_ids))
 </code></pre>
 
@@ -837,7 +837,7 @@ other attached packages:
  [2] mgcv_1.8-6
  [3] nlme_3.1-120
  [4] knitr_1.10.5
- [5] Bioc2015Workshop_0.1
+ [5] GoogleGenomicsBioc2015Workshop_0.1
  [6] TxDb.Hsapiens.UCSC.hg19.knownGene_3.1.3
  [7] GenomicFeatures_1.21.13
  [8] AnnotationDbi_1.31.17

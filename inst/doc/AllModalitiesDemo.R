@@ -4,7 +4,7 @@ library(knitr)
 opts_chunk$set(error=FALSE)
 
 ## ----message=FALSE, comment=NA-------------------------------------------
-pca_1kg <- read.table(file.path(system.file(package = "Bioc2015Workshop"), "extdata", "1kg-pca.tsv"), col.names=c("Sample", "PC1", "PC2"))
+pca_1kg <- read.table(file.path(system.file(package = "GoogleGenomicsBioc2015Workshop"), "extdata", "1kg-pca.tsv"), col.names=c("Sample", "PC1", "PC2"))
 
 ## ----pca, fig.align="center", fig.width=10, message=FALSE, comment=NA----
 require(ggplot2)
@@ -48,7 +48,7 @@ DisplayAndDispatchQuery <- function(queryUri, replacements=list()) {
 }
 
 ## ----message=FALSE, comment=NA-------------------------------------------
-sample_alt_counts <- DisplayAndDispatchQuery(file.path(system.file(package = "Bioc2015Workshop"), "sql", "sample-alt-counts.sql"))
+sample_alt_counts <- DisplayAndDispatchQuery(file.path(system.file(package = "GoogleGenomicsBioc2015Workshop"), "sql", "sample-alt-counts.sql"))
 
 ## ----alt-counts, fig.align="center", fig.width=10, message=FALSE, warning=FALSE, comment=NA----
 sample_alt_counts <- inner_join(sample_alt_counts, sample_info)
@@ -62,7 +62,7 @@ ggplot(sample_alt_counts) +
   ggtitle("Heterozygosity Counts within 1,000 Genomes")
 
 ## ----message=FALSE, comment=NA-------------------------------------------
-pca_1kg_brca1 <- read.table(file.path(system.file(package = "Bioc2015Workshop"), "extdata", "1kg-brca1-pca.tsv"), col.names=c("Sample", "PC1", "PC2"))
+pca_1kg_brca1 <- read.table(file.path(system.file(package = "GoogleGenomicsBioc2015Workshop"), "extdata", "1kg-brca1-pca.tsv"), col.names=c("Sample", "PC1", "PC2"))
 
 ## ----brca1-pca, fig.align="center", fig.width=10, message=FALSE, comment=NA----
 ggplot(pca_1kg_brca1) +
@@ -99,7 +99,7 @@ ggplot(pca_1kg_brca1) +
 
 ## ----message=FALSE, comment=NA-------------------------------------------
 case_sample_ids <- paste("'", filter(pca_1kg_brca1, case==TRUE)$Sample, "'", sep="", collapse=",")
-result <- DisplayAndDispatchQuery(file.path(system.file(package = "Bioc2015Workshop"), "sql", "gwas-brca1-pattern.sql"),
+result <- DisplayAndDispatchQuery(file.path(system.file(package = "GoogleGenomicsBioc2015Workshop"), "sql", "gwas-brca1-pattern.sql"),
                                   list(CASE_SAMPLE_IDS__=case_sample_ids))
 
 ## ----message=FALSE, comment=NA-------------------------------------------

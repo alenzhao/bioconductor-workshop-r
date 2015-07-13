@@ -73,12 +73,12 @@ DisplayAndDispatchQuery <- function(queryUri, project, replacements=list()) {
 }
 
 ## ------------------------------------------------------------------------
-file.show(file.path(system.file(package = "Bioc2015Workshop"),
+file.show(file.path(system.file(package = "GoogleGenomicsBioc2015Workshop"),
                     "sql",
                     "variant-level-data-for-brca1.sql"))
 
 ## ----comment=NA----------------------------------------------------------
-result <- DisplayAndDispatchQuery(file.path(system.file(package = "Bioc2015Workshop"),
+result <- DisplayAndDispatchQuery(file.path(system.file(package = "GoogleGenomicsBioc2015Workshop"),
                                             "sql",
                                             "variant-level-data-for-brca1.sql"),
                                   project=project,
@@ -91,7 +91,7 @@ summary(result)
 head(result)
 
 ## ----comment=NA----------------------------------------------------------
-result <- DisplayAndDispatchQuery(file.path(system.file(package = "Bioc2015Workshop"),
+result <- DisplayAndDispatchQuery(file.path(system.file(package = "GoogleGenomicsBioc2015Workshop"),
                                             "sql",
                                             "ti-tv-ratio.sql"),
                                   project=project,

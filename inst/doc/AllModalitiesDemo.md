@@ -44,7 +44,7 @@ In this example we are reading in previously computed results, but its easy to s
 
 
 ```r
-pca_1kg <- read.table(file.path(system.file(package = "Bioc2015Workshop"), "extdata", "1kg-pca.tsv"), col.names=c("Sample", "PC1", "PC2"))
+pca_1kg <- read.table(file.path(system.file(package = "GoogleGenomicsBioc2015Workshop"), "extdata", "1kg-pca.tsv"), col.names=c("Sample", "PC1", "PC2"))
 ```
 This analysis performed an `O(N^2)` computation upon the relevant fields within the *terabyte* of data by running an [Apache Spark](http://spark.apache.org/) job which used the [Google Genomics Variants API](https://cloud.google.com/genomics/v1beta2/reference/variants) for its input.  See the Google Genomics [PCA cookbook entry](http://googlegenomics.readthedocs.org/en/latest/use_cases/compute_principal_coordinate_analysis/index.html) for implementation details and instructions as to how to run this job.
 
@@ -114,7 +114,7 @@ DisplayAndDispatchQuery <- function(queryUri, replacements=list()) {
 
 
 ```r
-sample_alt_counts <- DisplayAndDispatchQuery(file.path(system.file(package = "Bioc2015Workshop"), "sql", "sample-alt-counts.sql"))
+sample_alt_counts <- DisplayAndDispatchQuery(file.path(system.file(package = "GoogleGenomicsBioc2015Workshop"), "sql", "sample-alt-counts.sql"))
 ```
 
 ```
@@ -165,7 +165,7 @@ Suppose we are interested in examining variants within the BRCA1 gene.  We might
 Again in this example we read in previously computed results, but since the amount of data over which we are computing is much less, it is feasible to run this Spark job on a local machine in just a few minutes.
 
 ```r
-pca_1kg_brca1 <- read.table(file.path(system.file(package = "Bioc2015Workshop"), "extdata", "1kg-brca1-pca.tsv"), col.names=c("Sample", "PC1", "PC2"))
+pca_1kg_brca1 <- read.table(file.path(system.file(package = "GoogleGenomicsBioc2015Workshop"), "extdata", "1kg-brca1-pca.tsv"), col.names=c("Sample", "PC1", "PC2"))
 ```
 
 Examining this data visually:
@@ -235,7 +235,7 @@ Next we perform a [simplistic GWAS](http://homes.cs.washington.edu/~suinlee/geno
 
 ```r
 case_sample_ids <- paste("'", filter(pca_1kg_brca1, case==TRUE)$Sample, "'", sep="", collapse=",")
-result <- DisplayAndDispatchQuery(file.path(system.file(package = "Bioc2015Workshop"), "sql", "gwas-brca1-pattern.sql"),
+result <- DisplayAndDispatchQuery(file.path(system.file(package = "GoogleGenomicsBioc2015Workshop"), "sql", "gwas-brca1-pattern.sql"),
                                   list(CASE_SAMPLE_IDS__=case_sample_ids))
 ```
 
@@ -661,7 +661,7 @@ other attached packages:
  [2] mgcv_1.8-6                             
  [3] nlme_3.1-120                           
  [4] knitr_1.10.5                           
- [5] Bioc2015Workshop_0.1                   
+ [5] GoogleGenomicsBioc2015Workshop_0.1                   
  [6] TxDb.Hsapiens.UCSC.hg19.knownGene_3.1.3
  [7] GenomicFeatures_1.21.13                
  [8] AnnotationDbi_1.31.17                  

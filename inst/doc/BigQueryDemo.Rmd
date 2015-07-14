@@ -54,7 +54,7 @@ theTable <- "genomics-public-data:platinum_genomes.variants"
 
 Let's start by just counting the number of records in the table:
 ```{r}
-querySql <- paste("SELECT COUNT(*) FROM [", theTable, "]", sep="")
+querySql <- paste("SELECT COUNT(1) FROM [", theTable, "]", sep="")
 querySql
 ```
 

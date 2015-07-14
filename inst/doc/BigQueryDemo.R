@@ -12,7 +12,7 @@ require(bigrquery)
 ## ##
 ## ## If you are using the Google Bioconductor workshop docker image, this is already
 ## ## set for you in your .Rprofile and you can skip this step.
-## 
+##
 ## # project <- "YOUR-PROJECT-ID"
 ## #####################################################################
 
@@ -23,7 +23,7 @@ theTable <- "genomics-public-data:platinum_genomes.variants"
 # theTable <- "genomics-public-data:1000_genomes_phase_3.variants"
 
 ## ------------------------------------------------------------------------
-querySql <- paste("SELECT COUNT(*) FROM [", theTable, "]", sep="")
+querySql <- paste("SELECT COUNT(1) FROM [", theTable, "]", sep="")
 querySql
 
 ## ------------------------------------------------------------------------
@@ -33,7 +33,7 @@ result <- query_exec(querySql, project=project)
 ## ######################[ TIP ]########################################
 ## ## If you have any trouble with OAuth and need to redo/reset OAuth,
 ## ## run the following code.
-## 
+##
 ## # if(FALSE != getOption("httr_oauth_cache")) {
 ## #  file.remove(getOption("httr_oauth_cache"))
 ## #}

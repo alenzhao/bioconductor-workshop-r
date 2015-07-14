@@ -254,11 +254,11 @@ theTable &lt;- &quot;genomics-public-data:platinum_genomes.variants&quot;
 
 <p>Let&#39;s start by just counting the number of records in the table:</p>
 
-<pre><code class="r">querySql &lt;- paste(&quot;SELECT COUNT(*) FROM [&quot;, theTable, &quot;]&quot;, sep=&quot;&quot;)
+<pre><code class="r">querySql &lt;- paste(&quot;SELECT COUNT(1) FROM [&quot;, theTable, &quot;]&quot;, sep=&quot;&quot;)
 querySql
 </code></pre>
 
-<pre><code>## [1] &quot;SELECT COUNT(*) FROM [genomics-public-data:platinum_genomes.variants]&quot;
+<pre><code>## [1] &quot;SELECT COUNT(1) FROM [genomics-public-data:platinum_genomes.variants]&quot;
 </code></pre>
 
 <p>And send the query to the cloud for execution:</p>

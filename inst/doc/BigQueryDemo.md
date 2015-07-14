@@ -54,12 +54,12 @@ theTable <- "genomics-public-data:platinum_genomes.variants"
 Let's start by just counting the number of records in the table:
 
 ```r
-querySql <- paste("SELECT COUNT(*) FROM [", theTable, "]", sep="")
+querySql <- paste("SELECT COUNT(1) FROM [", theTable, "]", sep="")
 querySql
 ```
 
 ```
-## [1] "SELECT COUNT(*) FROM [genomics-public-data:platinum_genomes.variants]"
+## [1] "SELECT COUNT(1) FROM [genomics-public-data:platinum_genomes.variants]"
 ```
 
 And send the query to the cloud for execution:

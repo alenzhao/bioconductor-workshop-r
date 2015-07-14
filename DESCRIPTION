@@ -1,0 +1,23 @@
+Package: GoogleGenomicsBioc2015Workshop
+Type: Package
+Title: Vignettes for GoogleGenomics workshop at the Bioc 2015 Conference.
+Version: 0.1
+Date: 2015-07-08
+Authors@R: c(person("Craig", "Citro", role = c("aut"),
+                    email="craigcitro@google.com"),
+             person("Nicole", "Deflaux", role = c("aut", "cre"),
+                    email="deflaux@google.com"),
+             person("Siddhartha", "Bagaria", role = c("aut"),
+                    email="sidb@google.com"))
+Depends:
+    R (>= 3.1.0)
+Suggests:
+    GoogleGenomics, VariantAnnotation, ggbio,
+    BSgenome.Hsapiens.UCSC.hg19, TxDb.Hsapiens.UCSC.hg19.knownGene,
+    bigrquery, ggplot2, dplyr, scales,
+    BiocStyle, httpuv, knitr, rmarkdown
+Description: Provides several vignettes for the GoogleGenomics workshop at the Bioc 2015 Conference.  Some of the vignettes can be built via the R package build but others cannot due to human intervention needed for the oauth flows.
+VignetteBuilder: knitr
+License: Apache License (== 2.0) | file LICENSE
+URL: https://cloud.google.com/genomics/
+BugReports: https://github.com/Bioconductor/GoogleGenomics/issues

@@ -22,9 +22,9 @@ knitAllVignettes <- function() {
     stop("be sure to setwd('PATH/TO/inst/doc') before running this command.")
   }
   lapply(c("BigQueryDemo.Rmd", "AllModalitiesDemo.Rmd"), function(rmd) {
+    purl(rmd, documentation=2)
     knit(rmd)
     knit2html(rmd)
-    purl(rmd, documentation=2)
   }
   )
 }

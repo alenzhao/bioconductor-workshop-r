@@ -1,48 +1,100 @@
+#' <!-- R Markdown Documentation, DO NOT EDIT THE PLAIN MARKDOWN VERSION OF THIS FILE -->
+#' 
+#' <!-- Copyright 2015 Google Inc. All rights reserved. -->
+#' 
+#' <!-- Licensed under the Apache License, Version 2.0 (the "License"); -->
+#' <!-- you may not use this file except in compliance with the License. -->
+#' <!-- You may obtain a copy of the License at -->
+#' 
+#' <!--     http://www.apache.org/licenses/LICENSE-2.0 -->
+#' 
+#' <!-- Unless required by applicable law or agreed to in writing, software -->
+#' <!-- distributed under the License is distributed on an "AS IS" BASIS, -->
+#' <!-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. -->
+#' <!-- See the License for the specific language governing permissions and -->
+#' <!-- limitations under the License. -->
+#' 
 ## ---- echo=FALSE, results="hide"-----------------------------------------
 # Ensure that any errors cause the Vignette build to fail.
 library(knitr)
 opts_chunk$set(error=FALSE)
 
+#' 
+#' # Analyzing Variants with BigQuery
+#' 
+#' Google Genomics can import variant calls from VCF files or Complete Genomics masterVar files so that you can query them with a simple API as we saw earlier in vignette [Working with Variants](http://bioconductor.org/packages/devel/bioc/vignettes/GoogleGenomics/inst/doc/AnnotatingVariants.html).  You can also export Variants to BigQuery for interactive analysis of these large datasets.  For more detail, see https://cloud.google.com/genomics/v1/managing-variants
+#' 
+#' In this example we will work with the [Illumina Platinum Genomes](http://googlegenomics.readthedocs.org/en/latest/use_cases/discover_public_data/platinum_genomes.html) dataset.
+#' 
+#' ## Run a query from R
+#' 
+#' The [bigrquery](https://github.com/hadley/bigrquery) package written by Hadley Wickham implements an R interface to [Google BigQuery](https://cloud.google.com/bigquery/).
+#' 
 ## ----message=FALSE-------------------------------------------------------
 require(bigrquery)
 
+#' 
 ## ----eval=FALSE----------------------------------------------------------
 ## ######################[ TIP ]########################################
 ## ## Set the Google Cloud Platform project id under which these queries will run.
 ## ##
 ## ## If you are using the Google Bioconductor workshop docker image, this is already
 ## ## set for you in your .Rprofile and you can skip this step.
-##
+## 
 ## # project <- "YOUR-PROJECT-ID"
 ## #####################################################################
 
+#' 
 ## ------------------------------------------------------------------------
 # Change the table here if you wish to run these queries against a different Variants table.
 theTable <- "genomics-public-data:platinum_genomes.variants"
 # theTable <- "genomics-public-data:1000_genomes.variants"
 # theTable <- "genomics-public-data:1000_genomes_phase_3.variants"
 
+#' 
+#' Let's start by just counting the number of records in the table:
 ## ------------------------------------------------------------------------
 querySql <- paste("SELECT COUNT(1) FROM [", theTable, "]", sep="")
 querySql
 
+#' 
+#' And send the query to the cloud for execution:
 ## ------------------------------------------------------------------------
 result <- query_exec(querySql, project=project)
 
+#' 
+#' [bigrquery](https://github.com/hadley/bigrquery) uses the package [httr](https://github.com/hadley/httr) to perform OAuth.
+#' 
 ## ----eval=FALSE----------------------------------------------------------
 ## ######################[ TIP ]########################################
 ## ## If you have any trouble with OAuth and need to redo/reset OAuth,
 ## ## run the following code.
-##
+## 
 ## # if(FALSE != getOption("httr_oauth_cache")) {
 ## #  file.remove(getOption("httr_oauth_cache"))
 ## #}
 ## #message("Restart R to redo/reset OAuth.")
 ## #####################################################################
 
+#' 
+#' And we see that the table has `r result[1,1]` rows - wow!
 ## ------------------------------------------------------------------------
 result
 
+#' 
+#' ## Run a query using the BigQuery Web User Interface
+#' 
+#' So what is actually in this table?  Click on [this link](https://bigquery.cloud.google.com/table/genomics-public-data:platinum_genomes.variants) to view the schema in the BigQuery web user interface.
+#' 
+#' We can also run the exact same query using the BigQuery web user interface.  In the BigQuery web user interface:
+#' 
+#'  (1) click on the *"Compose Query"* button
+#'  (2) paste in the SQL for the query we just ran via R
+#'  (3) click on *"Run Query"*.
+#' 
+#' ## Run a query stored in a file from R
+#' 
+#' Instead of typing SQL directly into our R code, we can use a convenience function to read SQL from a file.
 ## ------------------------------------------------------------------------
 DisplayAndDispatchQuery <- function(queryUri, project, replacements=list()) {
   if (missing(queryUri)) {
@@ -72,11 +124,15 @@ DisplayAndDispatchQuery <- function(queryUri, project, replacements=list()) {
   query_exec(querySql, project)
 }
 
+#' 
+#' This allows queries to be more easily shared among analyses and also reused for different datasets.  For example, in the following file we have a query that will retrieve data from any table exported from a Google Genomics Variant Set.
 ## ------------------------------------------------------------------------
 file.show(file.path(system.file(package = "GoogleGenomicsBioc2015Workshop"),
                     "sql",
                     "variant-level-data-for-brca1.sql"))
 
+#' 
+#' Now let's run the query to retrieve variant data for BRCA1:
 ## ----comment=NA----------------------------------------------------------
 result <- DisplayAndDispatchQuery(file.path(system.file(package = "GoogleGenomicsBioc2015Workshop"),
                                             "sql",
@@ -84,12 +140,23 @@ result <- DisplayAndDispatchQuery(file.path(system.file(package = "GoogleGenomic
                                   project=project,
                                   replacements=list("_THE_TABLE_"=theTable))
 
+#' Number of rows returned by this query: `r nrow(result)`.
+#' 
+#' Results from [bigrquery](https://github.com/hadley/bigrquery) are dataframes:
 ## ------------------------------------------------------------------------
 mode(result)
 class(result)
 summary(result)
 head(result)
 
+#' 
+#' ## Visualize Query Results
+#' 
+#' The prior query was basically a data retrieval similar to what we performed earlier in this workshop when we used the GoogleGenomics Bioconductor package to retrieve data from the Google Genomics Variants API.  
+#' 
+#' But BigQuery really shines when it is used to perform an actual *analysis* - do the heavy-lifting on the big data resident in the cloud, and bring back the result of the analysis to R for further downstream analysis and visualization.
+#' 
+#' Let's do that now with a query that computes the Transition Transversion ratio for the variants within genomic region windows.
 ## ----comment=NA----------------------------------------------------------
 result <- DisplayAndDispatchQuery(file.path(system.file(package = "GoogleGenomicsBioc2015Workshop"),
                                             "sql",
@@ -98,22 +165,30 @@ result <- DisplayAndDispatchQuery(file.path(system.file(package = "GoogleGenomic
                                   replacements=list("_THE_TABLE_"=theTable,
                                                     "_WINDOW_SIZE_"=100000))
 
+#' Number of rows returned by this query: `r nrow(result)`.
+#' 
 ## ------------------------------------------------------------------------
 summary(result)
 head(result)
 
+#' 
+#' Since [bigrquery](https://github.com/hadley/bigrquery) results are dataframes, we can make use of all sorts of other great R packages to do our downstream work.  Here we use a few more packages from the Hadleyverse for data filtering and visualization.
+#' 
 ## ----message=FALSE-------------------------------------------------------
 require(dplyr)
 
+#' 
 ## ------------------------------------------------------------------------
 # Change this filter if you want to visualize the result of this analysis for a different chromosome.
 chromosomeOneResults <- filter(result, reference_name == "chr1" | reference_name == "1")
 
+#' 
 ## ----message=FALSE-------------------------------------------------------
 require(ggplot2)
 require(scales)
 
-## ----titv----------------------------------------------------------------
+#' 
+## ----titv, fig.align="center", fig.width=10, message=FALSE, warning=FALSE, comment=NA----
 ggplot(chromosomeOneResults, aes(x=window_start, y=titv)) +
   geom_point() +
   stat_smooth() +
@@ -122,6 +197,8 @@ ggplot(chromosomeOneResults, aes(x=window_start, y=titv)) +
   ylab("Ti/Tv") +
   ggtitle("Ti/Tv by 100,000 base pair windows on Chromosome 1")
 
+#' 
+#' ## Provenance
 ## ----provenance, comment=NA----------------------------------------------
 sessionInfo()
 

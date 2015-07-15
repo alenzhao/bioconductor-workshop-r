@@ -22,7 +22,7 @@ opts_chunk$set(error=FALSE)
 
 # Analyzing Variants with BigQuery
 
-Google Genomics can import variant calls from VCF files or Complete Genomics masterVar files so that you can query them with a simple API as we saw earlier in vignette [Working with Variants](http://bioconductor.org/packages/devel/bioc/vignettes/GoogleGenomics/inst/doc/VariantAnnotation-comparison-test.html).  You can also export Variants to BigQuery for interactive analysis of these large datasets.  For more detail, see https://cloud.google.com/genomics/v1/managing-variants
+Google Genomics can import variant calls from VCF files or Complete Genomics masterVar files so that you can query them with a simple API as we saw earlier in vignette [Working with Variants](http://bioconductor.org/packages/devel/bioc/vignettes/GoogleGenomics/inst/doc/AnnotatingVariants.html).  You can also export Variants to BigQuery for interactive analysis of these large datasets.  For more detail, see https://cloud.google.com/genomics/v1/managing-variants
 
 In this example we will work with the [Illumina Platinum Genomes](http://googlegenomics.readthedocs.org/en/latest/use_cases/discover_public_data/platinum_genomes.html) dataset.
 
@@ -88,9 +88,9 @@ So what is actually in this table?  Click on [this link](https://bigquery.cloud.
 
 We can also run the exact same query using the BigQuery web user interface.  In the BigQuery web user interface:
 
-(1) click on the *"Compose Query"* button
-(2) paste in the SQL for the query we just ran via R
-(3) click on *"Run Query"*.
+ (1) click on the *"Compose Query"* button
+ (2) paste in the SQL for the query we just ran via R
+ (3) click on *"Run Query"*.
 
 ## Run a query stored in a file from R
 
@@ -188,7 +188,7 @@ require(ggplot2)
 require(scales)
 ```
 
-```{r titv}
+```{r titv, fig.align="center", fig.width=10, message=FALSE, warning=FALSE, comment=NA}
 ggplot(chromosomeOneResults, aes(x=window_start, y=titv)) +
   geom_point() +
   stat_smooth() +

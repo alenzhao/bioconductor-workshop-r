@@ -658,55 +658,54 @@ attached base packages:
 
 other attached packages:
  [1] ggbio_1.17.1                           
- [2] mgcv_1.8-6                             
- [3] nlme_3.1-120                           
- [4] knitr_1.10.5                           
- [5] GoogleGenomicsBioc2015Workshop_0.1                   
- [6] TxDb.Hsapiens.UCSC.hg19.knownGene_3.1.3
- [7] GenomicFeatures_1.21.13                
- [8] AnnotationDbi_1.31.17                  
- [9] BSgenome.Hsapiens.UCSC.hg19_1.4.0      
-[10] BSgenome_1.37.3                        
-[11] rtracklayer_1.29.12                    
-[12] GoogleGenomics_1.1.1                   
-[13] VariantAnnotation_1.15.20              
-[14] GenomicAlignments_1.5.11               
-[15] Rsamtools_1.21.13                      
-[16] Biostrings_2.37.2                      
-[17] XVector_0.9.1                          
-[18] SummarizedExperiment_0.3.2             
-[19] Biobase_2.29.1                         
-[20] GenomicRanges_1.21.16                  
-[21] GenomeInfoDb_1.5.8                     
-[22] IRanges_2.3.14                         
-[23] S4Vectors_0.7.10                       
-[24] BiocGenerics_0.15.3                    
-[25] scales_0.2.5                           
-[26] dplyr_0.4.2                            
-[27] ggplot2_1.0.1                          
+ [2] TxDb.Hsapiens.UCSC.hg19.knownGene_3.1.3
+ [3] GenomicFeatures_1.21.13                
+ [4] AnnotationDbi_1.31.17                  
+ [5] BSgenome.Hsapiens.UCSC.hg19_1.4.0      
+ [6] BSgenome_1.37.3                        
+ [7] rtracklayer_1.29.12                    
+ [8] GoogleGenomics_1.1.2                   
+ [9] VariantAnnotation_1.15.20              
+[10] GenomicAlignments_1.5.11               
+[11] Rsamtools_1.21.13                      
+[12] Biostrings_2.37.2                      
+[13] XVector_0.9.1                          
+[14] SummarizedExperiment_0.3.2             
+[15] Biobase_2.29.1                         
+[16] GenomicRanges_1.21.16                  
+[17] GenomeInfoDb_1.5.8                     
+[18] IRanges_2.3.14                         
+[19] S4Vectors_0.7.10                       
+[20] BiocGenerics_0.15.3                    
+[21] mgcv_1.8-6                             
+[22] nlme_3.1-120                           
+[23] scales_0.2.5                           
+[24] ggplot2_1.0.1                          
+[25] dplyr_0.4.2                            
+[26] knitr_1.10.5                           
+[27] GoogleGenomicsBioc2015Workshop_0.1     
 [28] bigrquery_0.1.0                        
 [29] stringr_1.0.0                          
 
 loaded via a namespace (and not attached):
  [1] httr_1.0.0           jsonlite_0.9.16      splines_3.2.1       
- [4] Formula_1.2-1        assertthat_0.1       latticeExtra_0.6-26 
- [7] RBGL_1.45.1          yaml_2.1.13          biovizBase_1.17.1   
+ [4] Formula_1.2-1        assertthat_0.1       highr_0.5           
+ [7] latticeExtra_0.6-26  RBGL_1.45.1          biovizBase_1.17.1   
 [10] RSQLite_1.0.0        lattice_0.20-31      digest_0.6.8        
-[13] RColorBrewer_1.1-2   colorspace_1.2-6     htmltools_0.2.6     
-[16] Matrix_1.2-0         plyr_1.8.3           OrganismDbi_1.11.42 
-[19] XML_3.98-1.3         biomaRt_2.25.1       zlibbioc_1.15.0     
-[22] BiocParallel_1.3.34  nnet_7.3-9           lazyeval_0.1.10     
-[25] proto_0.3-10         survival_2.38-2      magrittr_1.5        
-[28] mime_0.3             evaluate_0.7         GGally_0.5.0        
-[31] MASS_7.3-40          foreign_0.8-63       graph_1.47.2        
-[34] BiocInstaller_1.19.8 tools_3.2.1          formatR_1.2         
-[37] munsell_0.4.2        cluster_2.0.1        lambda.r_1.1.7      
-[40] futile.logger_1.4.1  grid_3.2.1           RCurl_1.95-4.7      
-[43] dichromat_2.0-0      rstudioapi_0.3.1     rjson_0.2.15        
-[46] bitops_1.0-6         labeling_0.3         rmarkdown_0.7       
-[49] gtable_0.1.2         DBI_0.3.1            reshape_0.8.5       
-[52] curl_0.9.1           markdown_0.7.7       reshape2_1.4.1      
-[55] R6_2.1.0             gridExtra_0.9.1      Hmisc_3.16-0        
-[58] futile.options_1.0.0 stringi_0.5-5        Rcpp_0.11.6         
-[61] rpart_4.1-9          acepack_1.3-3.3     
+[13] RColorBrewer_1.1-2   colorspace_1.2-6     Matrix_1.2-0        
+[16] plyr_1.8.3           OrganismDbi_1.11.42  XML_3.98-1.3        
+[19] biomaRt_2.25.1       zlibbioc_1.15.0      BiocParallel_1.3.34 
+[22] nnet_7.3-9           lazyeval_0.1.10      proto_0.3-10        
+[25] survival_2.38-2      magrittr_1.5         mime_0.3            
+[28] evaluate_0.7         GGally_0.5.0         MASS_7.3-40         
+[31] foreign_0.8-63       graph_1.47.2         BiocInstaller_1.19.8
+[34] tools_3.2.1          formatR_1.2          munsell_0.4.2       
+[37] cluster_2.0.1        lambda.r_1.1.7       futile.logger_1.4.1 
+[40] grid_3.2.1           RCurl_1.95-4.7       dichromat_2.0-0     
+[43] rstudioapi_0.3.1     rjson_0.2.15         bitops_1.0-6        
+[46] labeling_0.3         gtable_0.1.2         DBI_0.3.1           
+[49] reshape_0.8.5        curl_0.9.1           markdown_0.7.7      
+[52] reshape2_1.4.1       R6_2.1.0             gridExtra_0.9.1     
+[55] Hmisc_3.16-0         futile.options_1.0.0 stringi_0.5-5       
+[58] Rcpp_0.11.6          rpart_4.1-9          acepack_1.3-3.3     
 ```

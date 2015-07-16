@@ -229,6 +229,10 @@ hr {
 
 <p>In this example we will work with the <a href="http://googlegenomics.readthedocs.org/en/latest/use_cases/discover_public_data/platinum_genomes.html">Illumina Platinum Genomes</a> dataset.</p>
 
+<h3>Helpful BigQuery links</h3>
+
+<p>For this example, we&#39;ll also be working with <a href="https://cloud.google.com/bigquery/">Google BigQuery</a>. It&#39;s often helpful to have a <a href="https://cloud.google.com/bigquery/what-is-bigquery">link to the docs</a> handy, and especially the <a href="https://cloud.google.com/bigquery/query-reference">query reference</a>.</p>
+
 <h2>Run a query from R</h2>
 
 <p>The <a href="https://github.com/hadley/bigrquery">bigrquery</a> package written by Hadley Wickham implements an R interface to <a href="https://cloud.google.com/bigquery/">Google BigQuery</a>.</p>
@@ -486,7 +490,7 @@ ORDER BY
   reference_name,
   window_start
 
-Retrieving data:  2.2s
+Retrieving data:  2.3s
 </code></pre>
 
 <p>Number of rows returned by this query: 28734.</p>
@@ -573,23 +577,61 @@ locale:
 [11] LC_MEASUREMENT=en_US.UTF-8 LC_IDENTIFICATION=C       
 
 attached base packages:
-[1] stats     graphics  grDevices utils     datasets  methods   base     
+[1] stats4    parallel  stats     graphics  grDevices utils     datasets 
+[8] methods   base     
 
 other attached packages:
-[1] mgcv_1.8-6                         nlme_3.1-120                      
-[3] scales_0.2.5                       ggplot2_1.0.1                     
-[5] dplyr_0.4.2                        knitr_1.10.5                      
-[7] GoogleGenomicsBioc2015Workshop_0.1 bigrquery_0.1.0                   
-[9] stringr_1.0.0                     
+ [1] ggbio_1.17.1                           
+ [2] TxDb.Hsapiens.UCSC.hg19.knownGene_3.1.3
+ [3] GenomicFeatures_1.21.13                
+ [4] AnnotationDbi_1.31.17                  
+ [5] BSgenome.Hsapiens.UCSC.hg19_1.4.0      
+ [6] BSgenome_1.37.3                        
+ [7] rtracklayer_1.29.12                    
+ [8] GoogleGenomics_1.1.2                   
+ [9] VariantAnnotation_1.15.20              
+[10] GenomicAlignments_1.5.11               
+[11] Rsamtools_1.21.13                      
+[12] Biostrings_2.37.2                      
+[13] XVector_0.9.1                          
+[14] SummarizedExperiment_0.3.2             
+[15] Biobase_2.29.1                         
+[16] GenomicRanges_1.21.16                  
+[17] GenomeInfoDb_1.5.8                     
+[18] IRanges_2.3.14                         
+[19] S4Vectors_0.7.10                       
+[20] BiocGenerics_0.15.3                    
+[21] mgcv_1.8-6                             
+[22] nlme_3.1-120                           
+[23] scales_0.2.5                           
+[24] ggplot2_1.0.1                          
+[25] dplyr_0.4.2                            
+[26] knitr_1.10.5                           
+[27] GoogleGenomicsBioc2015Workshop_0.1     
+[28] bigrquery_0.1.0                        
+[29] stringr_1.0.0                          
 
 loaded via a namespace (and not attached):
- [1] Rcpp_0.11.6      rstudioapi_0.3.1 magrittr_1.5     MASS_7.3-40     
- [5] munsell_0.4.2    lattice_0.20-31  colorspace_1.2-6 R6_2.1.0        
- [9] httr_1.0.0       plyr_1.8.3       tools_3.2.1      parallel_3.2.1  
-[13] grid_3.2.1       gtable_0.1.2     DBI_0.3.1        lazyeval_0.1.10 
-[17] assertthat_0.1   digest_0.6.8     Matrix_1.2-0     reshape2_1.4.1  
-[21] formatR_1.2      curl_0.9.1       evaluate_0.7     labeling_0.3    
-[25] stringi_0.5-5    jsonlite_0.9.16  proto_0.3-10    
+ [1] httr_1.0.0           jsonlite_0.9.16      splines_3.2.1       
+ [4] Formula_1.2-1        assertthat_0.1       latticeExtra_0.6-26 
+ [7] RBGL_1.45.1          biovizBase_1.17.1    RSQLite_1.0.0       
+[10] lattice_0.20-31      digest_0.6.8         RColorBrewer_1.1-2  
+[13] colorspace_1.2-6     Matrix_1.2-0         plyr_1.8.3          
+[16] OrganismDbi_1.11.42  XML_3.98-1.3         biomaRt_2.25.1      
+[19] zlibbioc_1.15.0      BiocParallel_1.3.34  nnet_7.3-9          
+[22] lazyeval_0.1.10      proto_0.3-10         survival_2.38-2     
+[25] magrittr_1.5         mime_0.3             evaluate_0.7        
+[28] GGally_0.5.0         MASS_7.3-40          foreign_0.8-63      
+[31] graph_1.47.2         BiocInstaller_1.19.8 tools_3.2.1         
+[34] formatR_1.2          munsell_0.4.2        cluster_2.0.1       
+[37] lambda.r_1.1.7       futile.logger_1.4.1  grid_3.2.1          
+[40] RCurl_1.95-4.7       dichromat_2.0-0      rstudioapi_0.3.1    
+[43] rjson_0.2.15         bitops_1.0-6         labeling_0.3        
+[46] gtable_0.1.2         DBI_0.3.1            reshape_0.8.5       
+[49] curl_0.9.1           markdown_0.7.7       reshape2_1.4.1      
+[52] R6_2.1.0             gridExtra_0.9.1      Hmisc_3.16-0        
+[55] futile.options_1.0.0 stringi_0.5-5        Rcpp_0.11.6         
+[58] rpart_4.1-9          acepack_1.3-3.3     
 </code></pre>
 
 </body>

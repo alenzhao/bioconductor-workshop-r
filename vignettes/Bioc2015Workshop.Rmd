@@ -62,12 +62,12 @@ Open the code and the rendered vignette in separate windows:
 
 * Open the vignette to run it line-by-line via:
 ```{r eval=FALSE}
-file.edit(file.path(system.file(package = "GoogleGenomics"), "doc", "AnnotateVariants.Rmd"))
+file.edit(file.path(system.file(package = "GoogleGenomics"), "doc", "AnnotatingVariants.Rmd"))
 ```
 
 * View the rendered vignette 
 ```{r eval=FALSE}
-file.show(file.path(system.file(package = "GoogleGenomics"), "doc", "AnnotateVariants.html"))
+file.show(file.path(system.file(package = "GoogleGenomics"), "doc", "AnnotatingVariants.html"))
 ```
 
 Alternatively, you can view the documentation for the [GoogleGenomics](http://bioconductor.org/packages/devel/bioc/html/GoogleGenomics.html) package by running `help(package="GoogleGenomics")` and clicking on *"User guides, package vignettes and other documentation."*.

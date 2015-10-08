@@ -14,12 +14,6 @@
 <!-- See the License for the specific language governing permissions and -->
 <!-- limitations under the License. -->
 
-```{r, echo=FALSE, results="hide"}
-# Ensure that any errors cause the Vignette build to fail.
-library(knitr)
-opts_chunk$set(error=FALSE)
-```
-
 # Analyzing Variants with BigQuery
 
 Google Genomics can import variant calls from VCF files or Complete Genomics masterVar files so that you can query them with a simple API as we saw earlier in vignette [Working with Variants](http://bioconductor.org/packages/devel/bioc/vignettes/GoogleGenomics/inst/doc/AnnotatingVariants.html).  You can also export Variants to BigQuery for interactive analysis of these large datasets.  For more detail, see https://cloud.google.com/genomics/v1/managing-variants
@@ -35,7 +29,8 @@ For this example, we'll also be working with [Google BigQuery](https://cloud.goo
 The [bigrquery](https://github.com/hadley/bigrquery) package written by Hadley Wickham implements an R interface to [Google BigQuery](https://cloud.google.com/bigquery/).
 
 ```{r message=FALSE}
-require(bigrquery)
+library(dplyr)
+library(bigrquery)
 ```
 
 ```{r eval=FALSE}
@@ -99,34 +94,9 @@ We can also run the exact same query using the BigQuery web user interface.  In 
 ## Run a query stored in a file from R
 
 Instead of typing SQL directly into our R code, we can use a convenience function to read SQL from a file.
-```{r}
-DisplayAndDispatchQuery <- function(queryUri, project, replacements=list()) {
-  if (missing(queryUri)) {
-    stop("Pass the file path or url to the file containing the query.")
-  }
-  if(missing(project)) {
-    stop("Pass the project id of your Google Cloud Platform project.")
-  }
-
-  if (grepl("^https.*", queryUri)) {
-    # Read the query from a remote location.
-    querySql <- getURL(queryUri, ssl.verifypeer=FALSE)
-  } else {
-    # Read the query from the local filesystem.
-    querySql <- readChar(queryUri, nchars=1e6)
-  }
-
-  # If applicable, substitute values in the query template.
-  for(replacement in names(replacements)) {
-    querySql <- gsub(replacement, replacements[[replacement]], querySql, fixed=TRUE)
-  }
-
-  # Display the query to the terminal.
-  cat(querySql)
-
-  # Dispatch the query to BigQuery.
-  query_exec(querySql, project)
-}
+```{r comment=NA}
+library(GoogleGenomicsBioc2015Workshop)
+DisplayAndDispatchQuery
 ```
 
 This allows queries to be more easily shared among analyses and also reused for different datasets.  For example, in the following file we have a query that will retrieve data from any table exported from a Google Genomics Variant Set.
@@ -176,11 +146,7 @@ summary(result)
 head(result)
 ```
 
-Since [bigrquery](https://github.com/hadley/bigrquery) results are dataframes, we can make use of all sorts of other great R packages to do our downstream work.  Here we use a few more packages from the Hadleyverse for data filtering and visualization.
-
-```{r message=FALSE}
-require(dplyr)
-```
+Since [bigrquery](https://github.com/hadley/bigrquery) results are dataframes, we can make use of all sorts of other great R packages to do our downstream work.  Here we use a few more packages from the Hadleyverse: dplyr for data filtering and ggplot2 for visualization.
 
 ```{r}
 # Change this filter if you want to visualize the result of this analysis for a different chromosome.
@@ -188,8 +154,8 @@ chromosomeOneResults <- filter(result, reference_name == "chr1" | reference_name
 ```
 
 ```{r message=FALSE}
-require(ggplot2)
-require(scales)
+library(scales)
+library(ggplot2)
 ```
 
 ```{r titv, fig.align="center", fig.width=10, message=FALSE, warning=FALSE, comment=NA}

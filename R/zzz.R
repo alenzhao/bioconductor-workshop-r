@@ -12,19 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-#' These vignettes require an oauth2 flow and therefore cannot be built as
-#' part of the normal package build mechanism.
-#'
-#' Instead we build them manually and check in the rendered results.
-knitAllVignettes <- function() {
-  require(knitr)
-  if(FALSE == grepl('doc$', getwd())) {
-    stop("be sure to setwd('PATH/TO/inst/doc') before running this command.")
-  }
-  lapply(c("BigQueryDemo.Rmd", "AllModalitiesDemo.Rmd"), function(rmd) {
-    purl(rmd, documentation=2)
-    knit(rmd)
-    knit2html(rmd)
-  }
-  )
+.onAttach <- function(libname, pkgname) {
+  packageStartupMessage("\nTo view and run the vignettes.\n\thelp(package=\"GoogleGenomicsBioc2015Workshop\")")
 }

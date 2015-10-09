@@ -14,8 +14,6 @@
 <!-- See the License for the specific language governing permissions and -->
 <!-- limitations under the License. -->
 
-
-
 Data Analysis using Google Genomics
 ===================================
 
@@ -44,14 +42,23 @@ In this example we are reading in previously computed results, but its easy to s
 
 
 ```r
-pca_1kg <- read.table(file.path(system.file(package = "GoogleGenomicsBioc2015Workshop"), "extdata", "1kg-pca.tsv"), col.names=c("Sample", "PC1", "PC2"))
+library(GoogleGenomicsBioc2015Workshop)
+
+# The directory in which the raw data files reside.
+#extDataDir = "/PATH/TO/GIT/CLONE/OF/bioconductor-workshop-r/inst/extdata"
+extdataDir = system.file("extdata", package = "GoogleGenomicsBioc2015Workshop")
+```
+
+
+```r
+pca_1kg <- read.table(file.path(extdataDir, "1kg-pca.tsv"), col.names=c("Sample", "PC1", "PC2"))
 ```
 This analysis performed an `O(N^2)` computation upon the relevant fields within the *terabyte* of data by running an [Apache Spark](http://spark.apache.org/) job which used the [Google Genomics Variants API](https://cloud.google.com/genomics/v1beta2/reference/variants) for its input.  See the Google Genomics [PCA cookbook entry](http://googlegenomics.readthedocs.org/en/latest/use_cases/compute_principal_coordinate_analysis/index.html) for implementation details and instructions as to how to run this job.
 
 Visualizing the results, we see quite distinct clusters:
 
 ```r
-require(ggplot2)
+library(ggplot2)
 ggplot(pca_1kg) +
   geom_point(aes(x=PC1, y=PC2)) +
   xlab("principal component 1") +
@@ -65,7 +72,7 @@ Let's pull in the [supplementary information](http://ftp.1000genomes.ebi.ac.uk/v
 
 ```r
 sample_info <- read.csv("http://storage.googleapis.com/genomics-public-data/1000-genomes/other/sample_info/sample_info.csv")
-require(dplyr)
+library(dplyr)
 pca_1kg <- inner_join(pca_1kg, sample_info)
 ```
 
@@ -89,6 +96,10 @@ Let's also visualize a different aspect of this data by examining the variant co
 
 
 ```r
+# The directory in which the files containing SQL reside.
+#sqlDir = "/PATH/TO/GIT/CLONE/OF/bioconductor-workshop-r/inst/sql"
+sqlDir = system.file("sql", package = "GoogleGenomicsBioc2015Workshop")
+
 ######################[ TIP ]##################################
 ## Set the Google Cloud Platform project id under which these queries will run.
 ## If you are using the Bioconductor workshop docker image, this is already
@@ -100,21 +111,8 @@ Let's also visualize a different aspect of this data by examining the variant co
 
 
 ```r
-# Setup for BigQuery access
-require(bigrquery)
-DisplayAndDispatchQuery <- function(queryUri, replacements=list()) {
-  querySql <- readChar(queryUri, nchars=1e6)
-  cat(querySql)
-  for(replacement in names(replacements)) {
-    querySql <- sub(replacement, replacements[[replacement]], querySql, fixed=TRUE)
-  }
-  query_exec(querySql, project)
-}
-```
-
-
-```r
-sample_alt_counts <- DisplayAndDispatchQuery(file.path(system.file(package = "GoogleGenomicsBioc2015Workshop"), "sql", "sample-alt-counts.sql"))
+sample_alt_counts <- DisplayAndDispatchQuery(file.path(sqlDir, "sample-alt-counts.sql"),
+                                             project=project)
 ```
 
 ```
@@ -145,7 +143,7 @@ Visualizing the results, we again see quite distinct clusters:
 
 ```r
 sample_alt_counts <- inner_join(sample_alt_counts, sample_info)
-require(scales) # for scientific_format()
+library(scales) # for scientific_format()
 ggplot(sample_alt_counts) +
   geom_point(aes(x=single, y=double, color=Super_Population)) +
   scale_x_continuous(label=scientific_format()) +
@@ -165,7 +163,7 @@ Suppose we are interested in examining variants within the BRCA1 gene.  We might
 Again in this example we read in previously computed results, but since the amount of data over which we are computing is much less, it is feasible to run this Spark job on a local machine in just a few minutes.
 
 ```r
-pca_1kg_brca1 <- read.table(file.path(system.file(package = "GoogleGenomicsBioc2015Workshop"), "extdata", "1kg-brca1-pca.tsv"), col.names=c("Sample", "PC1", "PC2"))
+pca_1kg_brca1 <- read.table(file.path(extdataDir, "1kg-brca1-pca.tsv"), col.names=c("Sample", "PC1", "PC2"))
 ```
 
 Examining this data visually:
@@ -235,8 +233,9 @@ Next we perform a [simplistic GWAS](http://homes.cs.washington.edu/~suinlee/geno
 
 ```r
 case_sample_ids <- paste("'", filter(pca_1kg_brca1, case==TRUE)$Sample, "'", sep="", collapse=",")
-result <- DisplayAndDispatchQuery(file.path(system.file(package = "GoogleGenomicsBioc2015Workshop"), "sql", "gwas-brca1-pattern.sql"),
-                                  list(CASE_SAMPLE_IDS__=case_sample_ids))
+result <- DisplayAndDispatchQuery(file.path(sqlDir, "gwas-brca1-pattern.sql"),
+                                  project=project,
+                                  replacements=list(CASE_SAMPLE_IDS__=case_sample_ids))
 ```
 
 ```
@@ -298,7 +297,7 @@ FROM (
       # 1000 genomes data is bi-allelic so there is only ever a single alt
       SUM(0 == call.genotype) WITHIN call AS ref_count,
       SUM(1 == call.genotype) WITHIN call AS alt_count,
-      call.call_set_name IN (CASE_SAMPLE_IDS__) AS is_case,
+      call.call_set_name IN ('HG00096','HG00099','HG00100','HG00102','HG00104','HG00106','HG00108','HG00112','HG00114','HG00118','HG00119','HG00121','HG00124','HG00125','HG00127','HG00128','HG00135','HG00136','HG00137','HG00142','HG00143','HG00149','HG00150','HG00152','HG00155','HG00156','HG00158','HG00160','HG00177','HG00179','HG00180','HG00182','HG00183','HG00185','HG00187','HG00188','HG00189','HG00190','HG00231','HG00232','HG00234','HG00236','HG00237','HG00238','HG00239','HG00243','HG00244','HG00245','HG00246','HG00247','HG00250','HG00255','HG00256','HG00257','HG00258','HG00260','HG00262','HG00264','HG00267','HG00268','HG00269','HG00270','HG00271','HG00273','HG00274','HG00275','HG00277','HG00278','HG00280','HG00285','HG00309','HG00311','HG00312','HG00315','HG00318','HG00321','HG00324','HG00325','HG00326','HG00329','HG00334','HG00335','HG00336','HG00339','HG00342','HG00345','HG00349','HG00350','HG00351','HG00360','HG00362','HG00364','HG00366','HG00367','HG00373','HG00375','HG00376','HG00377','HG00382','HG00383','HG00384','HG00403','HG00404','HG00406','HG00407','HG00419','HG00422','HG00436','HG00437','HG00446','HG00448','HG00451','HG00452','HG00457','HG00458','HG00463','HG00464','HG00472','HG00473','HG00476','HG00478','HG00525','HG00531','HG00534','HG00537','HG00542','HG00543','HG00554','HG00556','HG00557','HG00565','HG00577','HG00578','HG00580','HG00581','HG00583','HG00593','HG00595','HG00596','HG00614','HG00620','HG00626','HG00628','HG00634','HG00635','HG00637','HG00638','HG00650','HG00651','HG00654','HG00656','HG00663','HG00671','HG00683','HG00684','HG00692','HG00699','HG00701','HG00702','HG00704','HG00707','HG00708','HG00731','HG00736','HG00740','HG01048','HG01052','HG01060','HG01061','HG01069','HG01070','HG01075','HG01079','HG01082','HG01085','HG01095','HG01097','HG01104','HG01105','HG01107','HG01113','HG01125','HG01133','HG01134','HG01136','HG01137','HG01140','HG01149','HG01167','HG01173','HG01183','HG01188','HG01190','HG01191','HG01198','HG01251','HG01257','HG01271','HG01272','HG01274','HG01275','HG01342','HG01344','HG01345','HG01350','HG01351','HG01354','HG01356','HG01360','HG01365','HG01366','HG01374','HG01377','HG01378','HG01384','HG01389','HG01390','HG01437','HG01441','HG01455','HG01461','HG01462','HG01465','HG01488','HG01492','HG01494','HG01495','HG01498','HG01516','HG01518','HG01519','HG01521','HG01522','HG01550','HG01551','HG01617','HG01618','HG01619','HG01625','HG01626','NA06986','NA07000','NA07051','NA07056','NA10847','NA10851','NA11829','NA11843','NA11892','NA11894','NA11919','NA11920','NA11931','NA11932','NA11933','NA11992','NA11995','NA12003','NA12043','NA12044','NA12046','NA12058','NA12154','NA12155','NA12249','NA12272','NA12273','NA12282','NA12283','NA12340','NA12341','NA12347','NA12348','NA12546','NA12717','NA12748','NA12761','NA12763','NA12778','NA12812','NA12814','NA12815','NA12827','NA12829','NA12830','NA12843','NA12872','NA12873','NA12889','NA18501','NA18504','NA18520','NA18522','NA18525','NA18527','NA18528','NA18534','NA18535','NA18541','NA18542','NA18545','NA18547','NA18548','NA18549','NA18550','NA18552','NA18553','NA18559','NA18560','NA18562','NA18566','NA18567','NA18570','NA18572','NA18573','NA18574','NA18576','NA18582','NA18592','NA18593','NA18596','NA18597','NA18602','NA18603','NA18605','NA18609','NA18611','NA18613','NA18614','NA18615','NA18616','NA18617','NA18619','NA18624','NA18627','NA18628','NA18630','NA18631','NA18633','NA18635','NA18636','NA18637','NA18639','NA18641','NA18642','NA18740','NA18748','NA18757','NA18856','NA18868','NA18874','NA18907','NA18910','NA18916','NA18924','NA18939','NA18940','NA18944','NA18947','NA18948','NA18951','NA18956','NA18959','NA18960','NA18961','NA18962','NA18963','NA18971','NA18974','NA18977','NA18980','NA18981','NA18983','NA18984','NA18987','NA18988','NA18992','NA18998','NA18999','NA19003','NA19004','NA19005','NA19007','NA19009','NA19020','NA19028','NA19035','NA19041','NA19044','NA19056','NA19057','NA19058','NA19062','NA19063','NA19064','NA19072','NA19078','NA19079','NA19080','NA19081','NA19083','NA19095','NA19096','NA19098','NA19099','NA19118','NA19147','NA19152','NA19171','NA19172','NA19197','NA19198','NA19204','NA19207','NA19213','NA19257','NA19307','NA19308','NA19309','NA19311','NA19324','NA19327','NA19328','NA19355','NA19373','NA19374','NA19376','NA19379','NA19383','NA19393','NA19395','NA19399','NA19404','NA19428','NA19429','NA19430','NA19431','NA19435','NA19439','NA19444','NA19445','NA19451','NA19453','NA19461','NA19467','NA19468','NA19469','NA19472','NA19473','NA19625','NA19648','NA19652','NA19654','NA19655','NA19657','NA19660','NA19663','NA19664','NA19672','NA19676','NA19678','NA19682','NA19685','NA19701','NA19707','NA19716','NA19720','NA19723','NA19725','NA19726','NA19731','NA19732','NA19734','NA19737','NA19738','NA19741','NA19750','NA19752','NA19753','NA19758','NA19759','NA19761','NA19762','NA19764','NA19770','NA19777','NA19786','NA19788','NA19789','NA19794','NA19795','NA19818','NA19819','NA19835','NA19900','NA19901','NA19909','NA19914','NA19916','NA19920','NA19922','NA19982','NA20281','NA20282','NA20287','NA20289','NA20294','NA20322','NA20334','NA20336','NA20341','NA20344','NA20348','NA20356','NA20357','NA20359','NA20363','NA20414','NA20503','NA20504','NA20505','NA20506','NA20507','NA20510','NA20512','NA20513','NA20515','NA20516','NA20517','NA20518','NA20519','NA20520','NA20521','NA20524','NA20525','NA20527','NA20529','NA20531','NA20532','NA20534','NA20535','NA20538','NA20539','NA20540','NA20542','NA20544','NA20581','NA20589','NA20753','NA20757','NA20758','NA20759','NA20761','NA20765','NA20769','NA20770','NA20772','NA20773','NA20774','NA20778','NA20785','NA20786','NA20792','NA20795','NA20798','NA20804','NA20805','NA20806','NA20807','NA20808','NA20810','NA20811','NA20812','NA20813','NA20814','NA20815','NA20816','NA20819','NA20826') AS is_case,
     FROM
       [genomics-public-data:1000_genomes.variants]
     WHERE
@@ -362,7 +361,7 @@ head(result)
 Now let's use the [GoogleGenomics R client](https://github.com/Bioconductor/GoogleGenomics) to retrieve the full records for the variants in which we are interested.
 
 ```r
-require(GoogleGenomics)
+library(GoogleGenomics)
 ```
 
 
@@ -437,9 +436,9 @@ This allows us to utilize the various BioConductor variant annotation packages:
 
 
 ```r
-require(VariantAnnotation)
-require(BSgenome.Hsapiens.UCSC.hg19)
-require(TxDb.Hsapiens.UCSC.hg19.knownGene)
+library(VariantAnnotation)
+library(BSgenome.Hsapiens.UCSC.hg19)
+library(TxDb.Hsapiens.UCSC.hg19.knownGene)
 txdb <- TxDb.Hsapiens.UCSC.hg19.knownGene
 codingVariants <- locateVariants(granges, txdb, CodingVariants())
 codingVariants
@@ -449,17 +448,17 @@ codingVariants
 GRanges object with 22 ranges and 9 metadata columns:
       seqnames               ranges strand   | LOCATION  LOCSTART
          <Rle>            <IRanges>  <Rle>   | <factor> <integer>
-    1    chr17 [41244000, 41244000]      -   |   coding      3335
-    2    chr17 [41244000, 41244000]      -   |   coding      3407
-    3    chr17 [41244000, 41244000]      -   |   coding      3548
-    4    chr17 [41244000, 41244000]      -   |   coding      3548
-    5    chr17 [41244000, 41244000]      -   |   coding      3548
+    1    chr17 [41244000, 41244000]      *   |   coding      3335
+    2    chr17 [41244000, 41244000]      *   |   coding      3407
+    3    chr17 [41244000, 41244000]      *   |   coding      3548
+    4    chr17 [41244000, 41244000]      *   |   coding      3548
+    5    chr17 [41244000, 41244000]      *   |   coding      3548
   ...      ...                  ...    ... ...      ...       ...
-   18    chr17 [41245466, 41245466]      -   |   coding      2082
-   19    chr17 [41245466, 41245466]      -   |   coding      2082
-   20    chr17 [41245466, 41245466]      -   |   coding      1941
-   21    chr17 [41245466, 41245466]      -   |   coding      2004
-   22    chr17 [41245466, 41245466]      -   |   coding      1194
+   18    chr17 [41245466, 41245466]      *   |   coding      2082
+   19    chr17 [41245466, 41245466]      *   |   coding      2082
+   20    chr17 [41245466, 41245466]      *   |   coding      1941
+   21    chr17 [41245466, 41245466]      *   |   coding      2004
+   22    chr17 [41245466, 41245466]      *   |   coding      1194
          LOCEND   QUERYID        TXID                    CDSID      GENEID
       <integer> <integer> <character>            <IntegerList> <character>
     1      3335         8       63595 186231,186230,186233,...         672
@@ -618,7 +617,7 @@ GAlignments object with 38 alignments and 1 metadata column:
 
 
 ```r
-require(ggbio)
+library(ggbio)
 strand_plot <- autoplot(galignments, aes(color=strand, fill=strand))
 coverage_plot <- ggplot(as(galignments, "GRanges")) + stat_coverage(color="gray40",
                                                       fill="skyblue")
@@ -640,72 +639,66 @@ sessionInfo()
 ```
 
 ```
-R version 3.2.1 RC (2015-06-10 r68509)
-Platform: x86_64-pc-linux-gnu (64-bit)
-Running under: Debian GNU/Linux 8 (jessie)
+R version 3.2.0 (2015-04-16)
+Platform: x86_64-apple-darwin13.4.0 (64-bit)
+Running under: OS X 10.10.5 (Yosemite)
 
 locale:
- [1] LC_CTYPE=en_US.UTF-8       LC_NUMERIC=C              
- [3] LC_TIME=en_US.UTF-8        LC_COLLATE=en_US.UTF-8    
- [5] LC_MONETARY=en_US.UTF-8    LC_MESSAGES=en_US.UTF-8   
- [7] LC_PAPER=en_US.UTF-8       LC_NAME=C                 
- [9] LC_ADDRESS=C               LC_TELEPHONE=C            
-[11] LC_MEASUREMENT=en_US.UTF-8 LC_IDENTIFICATION=C       
+[1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
 
 attached base packages:
 [1] stats4    parallel  stats     graphics  grDevices utils     datasets 
 [8] methods   base     
 
 other attached packages:
- [1] ggbio_1.17.1                           
- [2] TxDb.Hsapiens.UCSC.hg19.knownGene_3.1.3
- [3] GenomicFeatures_1.21.13                
- [4] AnnotationDbi_1.31.17                  
- [5] BSgenome.Hsapiens.UCSC.hg19_1.4.0      
- [6] BSgenome_1.37.3                        
- [7] rtracklayer_1.29.12                    
- [8] GoogleGenomics_1.1.2                   
- [9] VariantAnnotation_1.15.20              
-[10] GenomicAlignments_1.5.11               
-[11] Rsamtools_1.21.13                      
-[12] Biostrings_2.37.2                      
-[13] XVector_0.9.1                          
-[14] SummarizedExperiment_0.3.2             
-[15] Biobase_2.29.1                         
-[16] GenomicRanges_1.21.16                  
-[17] GenomeInfoDb_1.5.8                     
-[18] IRanges_2.3.14                         
-[19] S4Vectors_0.7.10                       
-[20] BiocGenerics_0.15.3                    
-[21] mgcv_1.8-6                             
-[22] nlme_3.1-120                           
-[23] scales_0.2.5                           
-[24] ggplot2_1.0.1                          
-[25] dplyr_0.4.2                            
-[26] knitr_1.10.5                           
-[27] GoogleGenomicsBioc2015Workshop_0.1     
-[28] bigrquery_0.1.0                        
-[29] stringr_1.0.0                          
+ [1] knitr_1.10.5                           
+ [2] ggbio_1.16.0                           
+ [3] TxDb.Hsapiens.UCSC.hg19.knownGene_3.1.2
+ [4] GenomicFeatures_1.20.1                 
+ [5] AnnotationDbi_1.30.1                   
+ [6] Biobase_2.28.0                         
+ [7] BSgenome.Hsapiens.UCSC.hg19_1.4.0      
+ [8] BSgenome_1.36.0                        
+ [9] rtracklayer_1.28.4                     
+[10] mgcv_1.8-6                             
+[11] nlme_3.1-120                           
+[12] ggplot2_1.0.1                          
+[13] scales_0.2.5                           
+[14] bigrquery_0.1.0                        
+[15] dplyr_0.4.2                            
+[16] GoogleGenomicsBioc2015Workshop_0.1     
+[17] GoogleGenomics_1.1.3                   
+[18] VariantAnnotation_1.14.1               
+[19] GenomicAlignments_1.4.1                
+[20] Rsamtools_1.20.4                       
+[21] Biostrings_2.36.1                      
+[22] XVector_0.8.0                          
+[23] GenomicRanges_1.20.4                   
+[24] GenomeInfoDb_1.4.0                     
+[25] IRanges_2.2.2                          
+[26] S4Vectors_0.6.0                        
+[27] BiocGenerics_0.14.0                    
 
 loaded via a namespace (and not attached):
- [1] httr_1.0.0           jsonlite_0.9.16      splines_3.2.1       
- [4] Formula_1.2-1        assertthat_0.1       highr_0.5           
- [7] latticeExtra_0.6-26  RBGL_1.45.1          biovizBase_1.17.1   
-[10] RSQLite_1.0.0        lattice_0.20-31      digest_0.6.8        
-[13] RColorBrewer_1.1-2   colorspace_1.2-6     Matrix_1.2-0        
-[16] plyr_1.8.3           OrganismDbi_1.11.42  XML_3.98-1.3        
-[19] biomaRt_2.25.1       zlibbioc_1.15.0      BiocParallel_1.3.34 
-[22] nnet_7.3-9           lazyeval_0.1.10      proto_0.3-10        
-[25] survival_2.38-2      magrittr_1.5         mime_0.3            
-[28] evaluate_0.7         GGally_0.5.0         MASS_7.3-40         
-[31] foreign_0.8-63       graph_1.47.2         BiocInstaller_1.19.8
-[34] tools_3.2.1          formatR_1.2          munsell_0.4.2       
-[37] cluster_2.0.1        lambda.r_1.1.7       futile.logger_1.4.1 
-[40] grid_3.2.1           RCurl_1.95-4.7       dichromat_2.0-0     
-[43] rstudioapi_0.3.1     rjson_0.2.15         bitops_1.0-6        
-[46] labeling_0.3         gtable_0.1.2         DBI_0.3.1           
-[49] reshape_0.8.5        curl_0.9.1           markdown_0.7.7      
-[52] reshape2_1.4.1       R6_2.1.0             gridExtra_0.9.1     
-[55] Hmisc_3.16-0         futile.options_1.0.0 stringi_0.5-5       
-[58] Rcpp_0.11.6          rpart_4.1-9          acepack_1.3-3.3     
+ [1] httr_1.0.0           jsonlite_0.9.17      splines_3.2.0       
+ [4] Formula_1.2-1        assertthat_0.1       latticeExtra_0.6-26 
+ [7] RBGL_1.44.0          biovizBase_1.16.0    RSQLite_1.0.0       
+[10] lattice_0.20-31      digest_0.6.8         RColorBrewer_1.1-2  
+[13] colorspace_1.2-6     htmltools_0.2.6      httpuv_1.3.3        
+[16] Matrix_1.2-0         plyr_1.8.3           OrganismDbi_1.10.0  
+[19] XML_3.98-1.2         biomaRt_2.24.0       zlibbioc_1.14.0     
+[22] BiocParallel_1.2.2   nnet_7.3-9           lazyeval_0.1.10     
+[25] proto_0.3-10         survival_2.38-1      magrittr_1.5        
+[28] mime_0.4             evaluate_0.7.2       GGally_0.5.0        
+[31] MASS_7.3-40          foreign_0.8-63       graph_1.46.0        
+[34] tools_3.2.0          formatR_1.2          stringr_1.0.0       
+[37] munsell_0.4.2        cluster_2.0.1        lambda.r_1.1.7      
+[40] futile.logger_1.4.1  grid_3.2.0           RCurl_1.95-4.6      
+[43] dichromat_2.0-0      rstudioapi_0.3.1     rjson_0.2.15        
+[46] rmarkdown_0.7        bitops_1.0-6         labeling_0.3        
+[49] gtable_0.1.2         DBI_0.3.1            reshape_0.8.5       
+[52] curl_0.9.3           markdown_0.7.7       reshape2_1.4.1      
+[55] R6_2.1.1             gridExtra_0.9.1      Hmisc_3.16-0        
+[58] futile.options_1.0.0 stringi_0.5-5        Rcpp_0.12.0         
+[61] rpart_4.1-9          acepack_1.3-3.3     
 ```

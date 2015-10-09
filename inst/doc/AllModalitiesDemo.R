@@ -14,12 +14,6 @@
 #' <!-- See the License for the specific language governing permissions and -->
 #' <!-- limitations under the License. -->
 #' 
-## ---- echo=FALSE, results="hide"-----------------------------------------
-# Ensure that any errors cause the Vignette build to fail.
-library(knitr)
-opts_chunk$set(error=FALSE)
-
-#' 
 #' Data Analysis using Google Genomics
 #' ===================================
 #' 
@@ -46,14 +40,22 @@ opts_chunk$set(error=FALSE)
 #' 
 #' In this example we are reading in previously computed results, but its easy to spin up an [Apache Spark](http://spark.apache.org/) cluster on [Google Compute Engine](https://cloud.google.com/hadoop/what-is-hadoop) and run this analysis.
 #' 
+## ------------------------------------------------------------------------
+library(GoogleGenomicsBioc2015Workshop)
+
+# The directory in which the raw data files reside.
+#extDataDir = "/PATH/TO/GIT/CLONE/OF/bioconductor-workshop-r/inst/extdata"
+extdataDir = system.file("extdata", package = "GoogleGenomicsBioc2015Workshop")
+
+#' 
 ## ----message=FALSE, comment=NA-------------------------------------------
-pca_1kg <- read.table(file.path(system.file(package = "GoogleGenomicsBioc2015Workshop"), "extdata", "1kg-pca.tsv"), col.names=c("Sample", "PC1", "PC2"))
+pca_1kg <- read.table(file.path(extdataDir, "1kg-pca.tsv"), col.names=c("Sample", "PC1", "PC2"))
 
 #' This analysis performed an `O(N^2)` computation upon the relevant fields within the *terabyte* of data by running an [Apache Spark](http://spark.apache.org/) job which used the [Google Genomics Variants API](https://cloud.google.com/genomics/v1beta2/reference/variants) for its input.  See the Google Genomics [PCA cookbook entry](http://googlegenomics.readthedocs.org/en/latest/use_cases/compute_principal_coordinate_analysis/index.html) for implementation details and instructions as to how to run this job.
 #' 
 #' Visualizing the results, we see quite distinct clusters:
 ## ----pca, fig.align="center", fig.width=10, message=FALSE, comment=NA----
-require(ggplot2)
+library(ggplot2)
 ggplot(pca_1kg) +
   geom_point(aes(x=PC1, y=PC2)) +
   xlab("principal component 1") +
@@ -64,7 +66,7 @@ ggplot(pca_1kg) +
 #' Let's pull in the [supplementary information](http://ftp.1000genomes.ebi.ac.uk/vol1/ftp/technical/working/20130606_sample_info/README_20130606_sample_info) we do have on these samples from [Google Cloud Storage](https://cloud.google.com/storage/):
 ## ----message=FALSE, warning=FALSE, comment=NA----------------------------
 sample_info <- read.csv("http://storage.googleapis.com/genomics-public-data/1000-genomes/other/sample_info/sample_info.csv")
-require(dplyr)
+library(dplyr)
 pca_1kg <- inner_join(pca_1kg, sample_info)
 
 #' 
@@ -83,31 +85,23 @@ ggplot(pca_1kg) +
 #' 
 #' Let's also visualize a different aspect of this data by examining the variant counts for each individual of heterozygous reference variants (where one of the alleles is equal to the reference) and heterozygous alternate variants (where neither of the alleles is equal to the reference).
 #' 
-## ----eval=FALSE----------------------------------------------------------
-## ######################[ TIP ]##################################
-## ## Set the Google Cloud Platform project id under which these queries will run.
-## ## If you are using the Bioconductor workshop docker image, this is already
-## ## set for you in your .Rprofile.
-## 
-## # project <- "YOUR-PROJECT-ID"
-## #####################################################################
+## ------------------------------------------------------------------------
+# The directory in which the files containing SQL reside.
+#sqlDir = "/PATH/TO/GIT/CLONE/OF/bioconductor-workshop-r/inst/sql"
+sqlDir = system.file("sql", package = "GoogleGenomicsBioc2015Workshop")
 
-#' 
-## ----comment=NA, message=FALSE, warning=FALSE----------------------------
-# Setup for BigQuery access
-require(bigrquery)
-DisplayAndDispatchQuery <- function(queryUri, replacements=list()) {
-  querySql <- readChar(queryUri, nchars=1e6)
-  cat(querySql)
-  for(replacement in names(replacements)) {
-    querySql <- sub(replacement, replacements[[replacement]], querySql, fixed=TRUE)
-  }
-  query_exec(querySql, project)
-}
+######################[ TIP ]##################################
+## Set the Google Cloud Platform project id under which these queries will run.
+## If you are using the Bioconductor workshop docker image, this is already
+## set for you in your .Rprofile.
+
+# project <- "YOUR-PROJECT-ID"
+#####################################################################
 
 #' 
 ## ----message=FALSE, comment=NA-------------------------------------------
-sample_alt_counts <- DisplayAndDispatchQuery(file.path(system.file(package = "GoogleGenomicsBioc2015Workshop"), "sql", "sample-alt-counts.sql"))
+sample_alt_counts <- DisplayAndDispatchQuery(file.path(sqlDir, "sample-alt-counts.sql"),
+                                             project=project)
 
 #' Number of rows returned by this query: `r nrow(sample_alt_counts)`.
 #' 
@@ -116,7 +110,7 @@ sample_alt_counts <- DisplayAndDispatchQuery(file.path(system.file(package = "Go
 #' Visualizing the results, we again see quite distinct clusters:
 ## ----alt-counts, fig.align="center", fig.width=10, message=FALSE, warning=FALSE, comment=NA----
 sample_alt_counts <- inner_join(sample_alt_counts, sample_info)
-require(scales) # for scientific_format()
+library(scales) # for scientific_format()
 ggplot(sample_alt_counts) +
   geom_point(aes(x=single, y=double, color=Super_Population)) +
   scale_x_continuous(label=scientific_format()) +
@@ -133,7 +127,7 @@ ggplot(sample_alt_counts) +
 #' 
 #' Again in this example we read in previously computed results, but since the amount of data over which we are computing is much less, it is feasible to run this Spark job on a local machine in just a few minutes.
 ## ----message=FALSE, comment=NA-------------------------------------------
-pca_1kg_brca1 <- read.table(file.path(system.file(package = "GoogleGenomicsBioc2015Workshop"), "extdata", "1kg-brca1-pca.tsv"), col.names=c("Sample", "PC1", "PC2"))
+pca_1kg_brca1 <- read.table(file.path(extdataDir, "1kg-brca1-pca.tsv"), col.names=c("Sample", "PC1", "PC2"))
 
 #' 
 #' Examining this data visually:
@@ -189,8 +183,9 @@ ggplot(pca_1kg_brca1) +
 #' Next we perform a [simplistic GWAS](http://homes.cs.washington.edu/~suinlee/genome560/lecture7.pdf) on the BRCA1 variants to retrieve a ranked list of the variants that appear to differentiate these groups.
 ## ----message=FALSE, comment=NA-------------------------------------------
 case_sample_ids <- paste("'", filter(pca_1kg_brca1, case==TRUE)$Sample, "'", sep="", collapse=",")
-result <- DisplayAndDispatchQuery(file.path(system.file(package = "GoogleGenomicsBioc2015Workshop"), "sql", "gwas-brca1-pattern.sql"),
-                                  list(CASE_SAMPLE_IDS__=case_sample_ids))
+result <- DisplayAndDispatchQuery(file.path(sqlDir, "gwas-brca1-pattern.sql"),
+                                  project=project,
+                                  replacements=list(CASE_SAMPLE_IDS__=case_sample_ids))
 
 #' Number of rows returned by this query: `r nrow(result)`.
 #' 
@@ -203,7 +198,7 @@ head(result)
 #' 
 #' Now let's use the [GoogleGenomics R client](https://github.com/Bioconductor/GoogleGenomics) to retrieve the full records for the variants in which we are interested.
 ## ----message=FALSE, comment=NA-------------------------------------------
-require(GoogleGenomics)
+library(GoogleGenomics)
 
 #' 
 ## ----eval=FALSE----------------------------------------------------------
@@ -238,9 +233,9 @@ granges
 #' This allows us to utilize the various BioConductor variant annotation packages:
 #' 
 ## ----comment=NA, message=FALSE-------------------------------------------
-require(VariantAnnotation)
-require(BSgenome.Hsapiens.UCSC.hg19)
-require(TxDb.Hsapiens.UCSC.hg19.knownGene)
+library(VariantAnnotation)
+library(BSgenome.Hsapiens.UCSC.hg19)
+library(TxDb.Hsapiens.UCSC.hg19.knownGene)
 txdb <- TxDb.Hsapiens.UCSC.hg19.knownGene
 codingVariants <- locateVariants(granges, txdb, CodingVariants())
 codingVariants
@@ -267,7 +262,7 @@ galignments
 
 #' 
 ## ----alignments, fig.align="center", fig.width=10, message=FALSE, warning=FALSE, comment=NA----
-require(ggbio)
+library(ggbio)
 strand_plot <- autoplot(galignments, aes(color=strand, fill=strand))
 coverage_plot <- ggplot(as(galignments, "GRanges")) + stat_coverage(color="gray40",
                                                       fill="skyblue")

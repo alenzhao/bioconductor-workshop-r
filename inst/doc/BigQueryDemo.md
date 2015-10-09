@@ -14,8 +14,6 @@
 <!-- See the License for the specific language governing permissions and -->
 <!-- limitations under the License. -->
 
-
-
 # Analyzing Variants with BigQuery
 
 Google Genomics can import variant calls from VCF files or Complete Genomics masterVar files so that you can query them with a simple API as we saw earlier in vignette [Working with Variants](http://bioconductor.org/packages/devel/bioc/vignettes/GoogleGenomics/inst/doc/AnnotatingVariants.html).  You can also export Variants to BigQuery for interactive analysis of these large datasets.  For more detail, see https://cloud.google.com/genomics/v1/managing-variants
@@ -32,7 +30,8 @@ The [bigrquery](https://github.com/hadley/bigrquery) package written by Hadley W
 
 
 ```r
-require(bigrquery)
+library(dplyr)
+library(bigrquery)
 ```
 
 
@@ -113,7 +112,12 @@ We can also run the exact same query using the BigQuery web user interface.  In 
 Instead of typing SQL directly into our R code, we can use a convenience function to read SQL from a file.
 
 ```r
-DisplayAndDispatchQuery <- function(queryUri, project, replacements=list()) {
+library(GoogleGenomicsBioc2015Workshop)
+DisplayAndDispatchQuery
+```
+
+```
+function(queryUri, project, replacements=list()) {
   if (missing(queryUri)) {
     stop("Pass the file path or url to the file containing the query.")
   }
@@ -123,7 +127,7 @@ DisplayAndDispatchQuery <- function(queryUri, project, replacements=list()) {
 
   if (grepl("^https.*", queryUri)) {
     # Read the query from a remote location.
-    querySql <- getURL(queryUri, ssl.verifypeer=FALSE)
+    querySql <- RCurl::getURL(queryUri, ssl.verifypeer=FALSE)
   } else {
     # Read the query from the local filesystem.
     querySql <- readChar(queryUri, nchars=1e6)
@@ -138,8 +142,9 @@ DisplayAndDispatchQuery <- function(queryUri, project, replacements=list()) {
   cat(querySql)
 
   # Dispatch the query to BigQuery.
-  query_exec(querySql, project)
+  bigrquery::query_exec(querySql, project)
 }
+<environment: namespace:GoogleGenomicsBioc2015Workshop>
 ```
 
 This allows queries to be more easily shared among analyses and also reused for different datasets.  For example, in the following file we have a query that will retrieve data from any table exported from a Google Genomics Variant Set.
@@ -289,6 +294,8 @@ FROM (
   FROM (
     SELECT
       reference_name,
+      reference_bases,
+      alternate_bases,
       INTEGER(FLOOR(start / 1e+05)) AS window,
       CONCAT(reference_bases, CONCAT(STRING('->'), alternate_bases)) AS mutation,
       COUNT(alternate_bases) WITHIN RECORD AS num_alts,
@@ -308,7 +315,7 @@ FROM (
 ORDER BY
   reference_name,
   window_start
-Retrieving data:  2.3s
+Retrieving data:  2.9s
 ```
 Number of rows returned by this query: 28734.
 
@@ -357,12 +364,7 @@ head(result)
 ## 6                    283
 ```
 
-Since [bigrquery](https://github.com/hadley/bigrquery) results are dataframes, we can make use of all sorts of other great R packages to do our downstream work.  Here we use a few more packages from the Hadleyverse for data filtering and visualization.
-
-
-```r
-require(dplyr)
-```
+Since [bigrquery](https://github.com/hadley/bigrquery) results are dataframes, we can make use of all sorts of other great R packages to do our downstream work.  Here we use a few more packages from the Hadleyverse: dplyr for data filtering and ggplot2 for visualization.
 
 
 ```r
@@ -372,8 +374,8 @@ chromosomeOneResults <- filter(result, reference_name == "chr1" | reference_name
 
 
 ```r
-require(ggplot2)
-require(scales)
+library(scales)
+library(ggplot2)
 ```
 
 
@@ -396,72 +398,65 @@ sessionInfo()
 ```
 
 ```
-R version 3.2.1 RC (2015-06-10 r68509)
-Platform: x86_64-pc-linux-gnu (64-bit)
-Running under: Debian GNU/Linux 8 (jessie)
+R version 3.2.0 (2015-04-16)
+Platform: x86_64-apple-darwin13.4.0 (64-bit)
+Running under: OS X 10.10.5 (Yosemite)
 
 locale:
- [1] LC_CTYPE=en_US.UTF-8       LC_NUMERIC=C              
- [3] LC_TIME=en_US.UTF-8        LC_COLLATE=en_US.UTF-8    
- [5] LC_MONETARY=en_US.UTF-8    LC_MESSAGES=en_US.UTF-8   
- [7] LC_PAPER=en_US.UTF-8       LC_NAME=C                 
- [9] LC_ADDRESS=C               LC_TELEPHONE=C            
-[11] LC_MEASUREMENT=en_US.UTF-8 LC_IDENTIFICATION=C       
+[1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
 
 attached base packages:
 [1] stats4    parallel  stats     graphics  grDevices utils     datasets 
 [8] methods   base     
 
 other attached packages:
- [1] ggbio_1.17.1                           
- [2] TxDb.Hsapiens.UCSC.hg19.knownGene_3.1.3
- [3] GenomicFeatures_1.21.13                
- [4] AnnotationDbi_1.31.17                  
- [5] BSgenome.Hsapiens.UCSC.hg19_1.4.0      
- [6] BSgenome_1.37.3                        
- [7] rtracklayer_1.29.12                    
- [8] GoogleGenomics_1.1.2                   
- [9] VariantAnnotation_1.15.20              
-[10] GenomicAlignments_1.5.11               
-[11] Rsamtools_1.21.13                      
-[12] Biostrings_2.37.2                      
-[13] XVector_0.9.1                          
-[14] SummarizedExperiment_0.3.2             
-[15] Biobase_2.29.1                         
-[16] GenomicRanges_1.21.16                  
-[17] GenomeInfoDb_1.5.8                     
-[18] IRanges_2.3.14                         
-[19] S4Vectors_0.7.10                       
-[20] BiocGenerics_0.15.3                    
-[21] mgcv_1.8-6                             
-[22] nlme_3.1-120                           
-[23] scales_0.2.5                           
-[24] ggplot2_1.0.1                          
-[25] dplyr_0.4.2                            
-[26] knitr_1.10.5                           
-[27] GoogleGenomicsBioc2015Workshop_0.1     
-[28] bigrquery_0.1.0                        
-[29] stringr_1.0.0                          
+ [1] ggbio_1.16.0                           
+ [2] TxDb.Hsapiens.UCSC.hg19.knownGene_3.1.2
+ [3] GenomicFeatures_1.20.1                 
+ [4] AnnotationDbi_1.30.1                   
+ [5] Biobase_2.28.0                         
+ [6] BSgenome.Hsapiens.UCSC.hg19_1.4.0      
+ [7] BSgenome_1.36.0                        
+ [8] rtracklayer_1.28.4                     
+ [9] mgcv_1.8-6                             
+[10] nlme_3.1-120                           
+[11] ggplot2_1.0.1                          
+[12] scales_0.2.5                           
+[13] bigrquery_0.1.0                        
+[14] dplyr_0.4.2                            
+[15] GoogleGenomicsBioc2015Workshop_0.1     
+[16] GoogleGenomics_1.1.3                   
+[17] VariantAnnotation_1.14.1               
+[18] GenomicAlignments_1.4.1                
+[19] Rsamtools_1.20.4                       
+[20] Biostrings_2.36.1                      
+[21] XVector_0.8.0                          
+[22] GenomicRanges_1.20.4                   
+[23] GenomeInfoDb_1.4.0                     
+[24] IRanges_2.2.2                          
+[25] S4Vectors_0.6.0                        
+[26] BiocGenerics_0.14.0                    
 
 loaded via a namespace (and not attached):
- [1] httr_1.0.0           jsonlite_0.9.16      splines_3.2.1       
+ [1] httr_1.0.0           jsonlite_0.9.17      splines_3.2.0       
  [4] Formula_1.2-1        assertthat_0.1       latticeExtra_0.6-26 
- [7] RBGL_1.45.1          biovizBase_1.17.1    RSQLite_1.0.0       
+ [7] RBGL_1.44.0          biovizBase_1.16.0    RSQLite_1.0.0       
 [10] lattice_0.20-31      digest_0.6.8         RColorBrewer_1.1-2  
-[13] colorspace_1.2-6     Matrix_1.2-0         plyr_1.8.3          
-[16] OrganismDbi_1.11.42  XML_3.98-1.3         biomaRt_2.25.1      
-[19] zlibbioc_1.15.0      BiocParallel_1.3.34  nnet_7.3-9          
-[22] lazyeval_0.1.10      proto_0.3-10         survival_2.38-2     
-[25] magrittr_1.5         mime_0.3             evaluate_0.7        
-[28] GGally_0.5.0         MASS_7.3-40          foreign_0.8-63      
-[31] graph_1.47.2         BiocInstaller_1.19.8 tools_3.2.1         
-[34] formatR_1.2          munsell_0.4.2        cluster_2.0.1       
-[37] lambda.r_1.1.7       futile.logger_1.4.1  grid_3.2.1          
-[40] RCurl_1.95-4.7       dichromat_2.0-0      rstudioapi_0.3.1    
-[43] rjson_0.2.15         bitops_1.0-6         labeling_0.3        
-[46] gtable_0.1.2         DBI_0.3.1            reshape_0.8.5       
-[49] curl_0.9.1           markdown_0.7.7       reshape2_1.4.1      
-[52] R6_2.1.0             gridExtra_0.9.1      Hmisc_3.16-0        
-[55] futile.options_1.0.0 stringi_0.5-5        Rcpp_0.11.6         
-[58] rpart_4.1-9          acepack_1.3-3.3     
+[13] colorspace_1.2-6     htmltools_0.2.6      httpuv_1.3.3        
+[16] Matrix_1.2-0         plyr_1.8.3           OrganismDbi_1.10.0  
+[19] XML_3.98-1.2         biomaRt_2.24.0       zlibbioc_1.14.0     
+[22] BiocParallel_1.2.2   nnet_7.3-9           lazyeval_0.1.10     
+[25] proto_0.3-10         survival_2.38-1      magrittr_1.5        
+[28] mime_0.4             evaluate_0.7.2       GGally_0.5.0        
+[31] MASS_7.3-40          foreign_0.8-63       graph_1.46.0        
+[34] tools_3.2.0          formatR_1.2          stringr_1.0.0       
+[37] munsell_0.4.2        cluster_2.0.1        lambda.r_1.1.7      
+[40] futile.logger_1.4.1  grid_3.2.0           RCurl_1.95-4.6      
+[43] dichromat_2.0-0      rstudioapi_0.3.1     rjson_0.2.15        
+[46] rmarkdown_0.7        bitops_1.0-6         labeling_0.3        
+[49] gtable_0.1.2         DBI_0.3.1            reshape_0.8.5       
+[52] curl_0.9.3           markdown_0.7.7       reshape2_1.4.1      
+[55] R6_2.1.1             gridExtra_0.9.1      knitr_1.10.5        
+[58] Hmisc_3.16-0         futile.options_1.0.0 stringi_0.5-5       
+[61] Rcpp_0.12.0          rpart_4.1-9          acepack_1.3-3.3     
 ```

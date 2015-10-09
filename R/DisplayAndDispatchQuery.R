@@ -19,8 +19,10 @@
 #'
 #' @param queryUri File path or url to file containing SQL code.
 #' @param project The ID of a Google Cloud Platform project of which the user is a member.
-#' @param replacements A list of key/value pairs.  For each pair the key, if found in the
-#'  SQL, will be replaced with the value.
+#' @param replacements A list of key/value pairs where the elements are the "values", and
+#'  the name of the element is the corresponding key i.e. replacements[[KEY]] == VALUE.
+#'  For each pair, if the KEY is found in the SQL using an exact string match criteria,
+#'  it will be replaced with the VALUE.
 #' @return The dataframe of query results.
 #' @export
 DisplayAndDispatchQuery <- function(queryUri, project, replacements=list()) {

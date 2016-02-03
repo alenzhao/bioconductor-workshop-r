@@ -53,7 +53,7 @@ extdataDir = system.file("extdata", package = "GoogleGenomicsBioc2015Workshop")
 ```r
 pca_1kg <- read.table(file.path(extdataDir, "1kg-pca.tsv"), col.names=c("Sample", "PC1", "PC2"))
 ```
-This analysis performed an `O(N^2)` computation upon the relevant fields within the *terabyte* of data by running an [Apache Spark](http://spark.apache.org/) job which used the [Google Genomics Variants API](https://cloud.google.com/genomics/v1beta2/reference/variants) for its input.  See the Google Genomics [PCA cookbook entry](http://googlegenomics.readthedocs.org/en/latest/use_cases/compute_principal_coordinate_analysis/index.html) for implementation details and instructions as to how to run this job.
+This analysis performed an `O(N^2)` computation upon the relevant fields within the *terabyte* of data by running an [Apache Spark](http://spark.apache.org/) job which used the [Google Genomics Variants API](https://cloud.google.com/genomics/reference/rest/v1/variants) for its input.  See the Google Genomics [PCA cookbook entry](http://googlegenomics.readthedocs.org/en/latest/use_cases/compute_principal_coordinate_analysis/index.html) for implementation details and instructions as to how to run this job.
 
 Visualizing the results, we see quite distinct clusters:
 
@@ -258,17 +258,17 @@ SELECT
   case_alt_count,
   control_ref_count,
   control_alt_count,
+  # https://en.wikipedia.org/wiki/Yates%27s_correction_for_continuity
   ROUND(
-    POW(case_ref_count - (ref_count/allele_count)*case_count,
+    POW(ABS(case_ref_count - (ref_count/allele_count)*case_count) - 0.5,
       2)/((ref_count/allele_count)*case_count) +
-    POW(control_ref_count - (ref_count/allele_count)*control_count,
+    POW(ABS(control_ref_count - (ref_count/allele_count)*control_count) - 0.5,
       2)/((ref_count/allele_count)*control_count) +
-    POW(case_alt_count - (alt_count/allele_count)*case_count,
+    POW(ABS(case_alt_count - (alt_count/allele_count)*case_count) - 0.5,
       2)/((alt_count/allele_count)*case_count) +
-    POW(control_alt_count - (alt_count/allele_count)*control_count,
+    POW(ABS(control_alt_count - (alt_count/allele_count)*control_count) - 0.5,
       2)/((alt_count/allele_count)*control_count),
-    3)
-  AS chi_squared_score
+    3) AS chi_squared_score
 FROM (
   SELECT
     reference_name,
@@ -324,7 +324,7 @@ ORDER BY
   chi_squared_score DESC,
   start
 ```
-Number of rows returned by this query: 183.
+Number of rows returned by this query: 180.
 
 Note that even though this query ran over a small region of the genome, with a minor change to the SQL we could have run this same GWAS query over all variants within a much larger region, over an entire chromosome, or even the full dataset; returning the ranked list of variants that differ between the two groups.
 
@@ -348,12 +348,12 @@ head(result)
 5       1158          1026         2184      1473       711            447
 6       1158          1026         2184      1471       713            446
   case_alt_count control_ref_count control_alt_count chi_squared_score
-1            711              1026                 0           934.025
-2            711              1026                 0           934.025
-3            711              1026                 0           934.025
-4            711              1026                 0           934.025
-5            711              1026                 0           934.025
-6            712              1025                 1           932.333
+1            711              1026                 0           931.230
+2            711              1026                 0           931.230
+3            711              1026                 0           931.230
+4            711              1026                 0           931.230
+5            711              1026                 0           931.230
+6            712              1025                 1           929.544
 ```
 
 ### Annotate Variants with BioConductor
@@ -575,7 +575,7 @@ Zooming-in Even Further
 
 ### Visualize Reads with BioConductor
 
-We can also retrieve the reads from the [Genomics Reads API](https://cloud.google.com/genomics/v1beta2/reference/readgroupsets) for a given sample and examine coverage:
+We can also retrieve the reads from the [Genomics Reads API](https://cloud.google.com/genomics/reference/rest/v1/readgroupsets) for a given sample and examine coverage:
 
 ```r
 galignments <- getReads(readGroupSetId="CMvnhpKTFhDnk4_9zcKO3_YB", chromosome="17",
@@ -639,9 +639,9 @@ sessionInfo()
 ```
 
 ```
-R version 3.2.0 (2015-04-16)
+R version 3.2.2 (2015-08-14)
 Platform: x86_64-apple-darwin13.4.0 (64-bit)
-Running under: OS X 10.10.5 (Yosemite)
+Running under: OS X 10.11.3 (El Capitan)
 
 locale:
 [1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
@@ -651,54 +651,50 @@ attached base packages:
 [8] methods   base     
 
 other attached packages:
- [1] knitr_1.10.5                           
- [2] ggbio_1.16.0                           
- [3] TxDb.Hsapiens.UCSC.hg19.knownGene_3.1.2
- [4] GenomicFeatures_1.20.1                 
- [5] AnnotationDbi_1.30.1                   
- [6] Biobase_2.28.0                         
- [7] BSgenome.Hsapiens.UCSC.hg19_1.4.0      
- [8] BSgenome_1.36.0                        
- [9] rtracklayer_1.28.4                     
-[10] mgcv_1.8-6                             
-[11] nlme_3.1-120                           
-[12] ggplot2_1.0.1                          
-[13] scales_0.2.5                           
-[14] bigrquery_0.1.0                        
-[15] dplyr_0.4.2                            
-[16] GoogleGenomicsBioc2015Workshop_0.1     
-[17] GoogleGenomics_1.1.3                   
-[18] VariantAnnotation_1.14.1               
-[19] GenomicAlignments_1.4.1                
-[20] Rsamtools_1.20.4                       
-[21] Biostrings_2.36.1                      
-[22] XVector_0.8.0                          
-[23] GenomicRanges_1.20.4                   
-[24] GenomeInfoDb_1.4.0                     
-[25] IRanges_2.2.2                          
-[26] S4Vectors_0.6.0                        
-[27] BiocGenerics_0.14.0                    
+ [1] ggbio_1.16.0                           
+ [2] TxDb.Hsapiens.UCSC.hg19.knownGene_3.1.2
+ [3] GenomicFeatures_1.20.1                 
+ [4] AnnotationDbi_1.30.1                   
+ [5] Biobase_2.28.0                         
+ [6] BSgenome.Hsapiens.UCSC.hg19_1.4.0      
+ [7] BSgenome_1.36.0                        
+ [8] rtracklayer_1.28.4                     
+ [9] GoogleGenomics_1.1.3                   
+[10] VariantAnnotation_1.14.1               
+[11] GenomicAlignments_1.4.1                
+[12] Rsamtools_1.20.4                       
+[13] Biostrings_2.36.1                      
+[14] XVector_0.8.0                          
+[15] GenomicRanges_1.20.4                   
+[16] GenomeInfoDb_1.4.0                     
+[17] IRanges_2.2.2                          
+[18] S4Vectors_0.6.0                        
+[19] BiocGenerics_0.14.0                    
+[20] scales_0.3.0                           
+[21] bigrquery_0.1.0                        
+[22] dplyr_0.4.3                            
+[23] ggplot2_1.0.1                          
+[24] GoogleGenomicsBioc2015Workshop_0.1     
+[25] knitr_1.10.5                           
 
 loaded via a namespace (and not attached):
- [1] httr_1.0.0           jsonlite_0.9.17      splines_3.2.0       
- [4] Formula_1.2-1        assertthat_0.1       latticeExtra_0.6-26 
- [7] RBGL_1.44.0          biovizBase_1.16.0    RSQLite_1.0.0       
-[10] lattice_0.20-31      digest_0.6.8         RColorBrewer_1.1-2  
-[13] colorspace_1.2-6     htmltools_0.2.6      httpuv_1.3.3        
-[16] Matrix_1.2-0         plyr_1.8.3           OrganismDbi_1.10.0  
-[19] XML_3.98-1.2         biomaRt_2.24.0       zlibbioc_1.14.0     
-[22] BiocParallel_1.2.2   nnet_7.3-9           lazyeval_0.1.10     
-[25] proto_0.3-10         survival_2.38-1      magrittr_1.5        
-[28] mime_0.4             evaluate_0.7.2       GGally_0.5.0        
-[31] MASS_7.3-40          foreign_0.8-63       graph_1.46.0        
-[34] tools_3.2.0          formatR_1.2          stringr_1.0.0       
-[37] munsell_0.4.2        cluster_2.0.1        lambda.r_1.1.7      
-[40] futile.logger_1.4.1  grid_3.2.0           RCurl_1.95-4.6      
-[43] dichromat_2.0-0      rstudioapi_0.3.1     rjson_0.2.15        
-[46] rmarkdown_0.7        bitops_1.0-6         labeling_0.3        
-[49] gtable_0.1.2         DBI_0.3.1            reshape_0.8.5       
-[52] curl_0.9.3           markdown_0.7.7       reshape2_1.4.1      
-[55] R6_2.1.1             gridExtra_0.9.1      Hmisc_3.16-0        
-[58] futile.options_1.0.0 stringi_0.5-5        Rcpp_0.12.0         
-[61] rpart_4.1-9          acepack_1.3-3.3     
+ [1] Rcpp_0.12.0          biovizBase_1.16.0    lattice_0.20-33     
+ [4] assertthat_0.1       digest_0.6.8         R6_2.1.1            
+ [7] plyr_1.8.3           acepack_1.3-3.3      futile.options_1.0.0
+[10] RSQLite_1.0.0        evaluate_0.7.2       httr_1.0.0          
+[13] highr_0.5            zlibbioc_1.14.0      lazyeval_0.1.10     
+[16] curl_0.9.3           rstudioapi_0.3.1     rpart_4.1-10        
+[19] proto_0.3-10         labeling_0.3         splines_3.2.2       
+[22] BiocParallel_1.2.2   foreign_0.8-65       stringr_1.0.0       
+[25] RCurl_1.95-4.6       biomaRt_2.24.0       munsell_0.4.2       
+[28] nnet_7.3-10          gridExtra_0.9.1      Hmisc_3.16-0        
+[31] XML_3.98-1.2         reshape_0.8.5        MASS_7.3-43         
+[34] bitops_1.0-6         RBGL_1.44.0          grid_3.2.2          
+[37] jsonlite_0.9.17      GGally_0.5.0         gtable_0.1.2        
+[40] DBI_0.3.1            magrittr_1.5         formatR_1.2         
+[43] graph_1.46.0         stringi_0.5-5        reshape2_1.4.1      
+[46] latticeExtra_0.6-26  futile.logger_1.4.1  Formula_1.2-1       
+[49] RColorBrewer_1.1-2   rjson_0.2.15         lambda.r_1.1.7      
+[52] tools_3.2.2          dichromat_2.0-0      OrganismDbi_1.10.0  
+[55] survival_2.38-3      colorspace_1.2-6     cluster_2.0.3       
 ```

@@ -277,7 +277,7 @@ querySql
 ## If you have any trouble with OAuth and need to redo/reset OAuth,
 ## run the following code.
 
-# if(FALSE != getOption(&quot;httr_oauth_cache&quot;)) {
+# if(!is.null(getOption(&quot;httr_oauth_cache&quot;))) {
 #  file.remove(getOption(&quot;httr_oauth_cache&quot;))
 #}
 #message(&quot;Restart R to redo/reset OAuth.&quot;)
